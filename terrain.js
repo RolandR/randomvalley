@@ -1,13 +1,15 @@
-function generateTerrain(canvas, context){
+function generateTerrain(canvas, context, settings){
 
-	var terrainPoints = [canvas.height/4, 3*canvas.height/4, canvas.height/4];
+	var {haze, terrainPoints, smoothness, c0} = settings;
+	
 	var terrainBorders = [0, canvas.width];
 	var ruggedness = 1; // lower for smoother terrain, higher for more extreme
 	var terrainWidth = Math.abs(terrainBorders[0] - terrainBorders[1]);
 
 	generateStep();
-	smooth(200);
+	smooth(smoothness);
 	render();
+	//erode(0, 0);
 
 	function addTerrainPoints(){
 
@@ -39,6 +41,32 @@ function generateTerrain(canvas, context){
 		terrainPoints = newTerrainPoints;
 
 		//console.log(terrainPoints.length, newTerrainPoints.length);
+	}
+
+	function erode(value, iterations){
+
+		var len = terrainPoints.length;
+
+		var peaks = [];
+		
+		for(var i = 0; i < terrainPoints.length; i++){
+			if(terrainPoints[i] <= terrainPoints[(len+i-1) % len] && terrainPoints[i] <= terrainPoints[(len+i+1) % len]){
+				peaks.push(i);
+			}
+		}
+
+		for(var i in peaks){
+			context.beginPath();
+			context.moveTo(
+				(peaks[i]/(len)) * canvas.width,
+				0
+			);
+			context.lineTo(
+				(peaks[i]/(len)) * canvas.width,
+				canvas.height
+			);
+			context.stroke();
+		}
 	}
 
 	function render(){
@@ -73,10 +101,30 @@ function generateTerrain(canvas, context){
 			);
 		}
 		context.closePath();
+		
+		var c1 = [];
+		
+		for(var i in c0){
+			c1[i] = c0[i] - 20;
+		}
+		
+		var cHaze = [230, 235, 255];
+
+		for(var i in c0){
+			c0[i] = (c0[i] + haze*cHaze[i]) / (1+haze);
+			c0[i] = ~~Math.min(c0[i], 255);
+		}
+		for(var i in c1){
+			c1[i] = (c1[i] + haze*cHaze[i]) / (1+haze);
+			c1[i] = ~~Math.min(c1[i], 255);
+		}
+
+		c0 = "rgb("+c0[0]+", "+c0[1]+", "+c0[2]+")";
+		c1 = "rgb("+c1[0]+", "+c1[1]+", "+c1[2]+")";
 
 		var gradient = context.createLinearGradient(0, 0, 0, canvas.height);
-		gradient.addColorStop(0, "#819e3b");
-		gradient.addColorStop(1, "#62782d");
+		gradient.addColorStop(0, c0);
+		gradient.addColorStop(1, c1);
 		context.fillStyle = gradient;
 
 		context.strokeStyle = "#113300";

@@ -21,21 +21,48 @@ function buildLandscape(){
 	preCanvas.width = width*scale;
 	preCanvas.height = height*scale;
 
-
-	generateSkyGradient(preCanvas, preContext);
+	generateSkyGradient(preCanvas, preContext, {
+		 scale: scale
+		,intensity: 1
+	});
 	render8bit();
-
+	
 	for(var i = 0; i < ~~(1+Math.random()*5); i++){
 		generateCloud(preCanvas, preContext, {
 			 cx: Math.random() * canvas.width
-			,cy: canvas.height/2 - Math.random() * canvas.height/3
+			,cy: 3*canvas.height/4 - Math.random() * 2*canvas.height/3
 			,count: 3 + ~~(Math.random()*5)
 			,initialRadius: 17
 		});
 		render8bit();
 	}
 
-	var terrain = generateTerrain(preCanvas, preContext);
+	generateTerrain(preCanvas, preContext, {
+		 haze: 0.7
+		,terrainPoints: [canvas.height/4, canvas.height/2, canvas.height/4]
+		,smoothness: 5
+		,c0: [100, 100, 100]
+	});
+	render8bit();
+
+	//return;
+
+	
+
+	generateTerrain(preCanvas, preContext, {
+		 haze: 0.5
+		,terrainPoints: [canvas.height/2, 2*canvas.height/3, canvas.height/2]
+		,smoothness: 100
+		,c0: [100, 120, 40]
+	});
+	render8bit();
+
+	var terrain = generateTerrain(preCanvas, preContext, {
+		 haze: 0
+		,terrainPoints: [canvas.height/2, 3*canvas.height/4, canvas.height/2]
+		,smoothness: 200
+		,c0: [129, 158, 62]
+	});
 	render8bit();
 
 	var nextTree = 0;
