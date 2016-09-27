@@ -6,6 +6,8 @@ function generateTerrain(canvas, context){
 	var terrainWidth = Math.abs(terrainBorders[0] - terrainBorders[1]);
 
 	generateStep();
+	smooth(200);
+	render();
 
 	function addTerrainPoints(){
 
@@ -20,22 +22,26 @@ function generateTerrain(canvas, context){
 	}
 
 	function smooth(radius){
-		var newTerrainPoints = terrainPoints;
-		for(var i in terrainPoints){
+		var newTerrainPoints = [];
+		for(var i = 0; i < terrainPoints.length; i++){
 			var sum = 0;
-			for(var a = -radius; a <= radius; a++){
-				
+			for(var a = 0-radius; a <= radius; a++){
+				if(typeof terrainPoints[i+a] == "undefined"){
+					sum += terrainPoints[i];
+				} else {
+					sum += terrainPoints[i+a];
+				}
 			}
+
+			newTerrainPoints[i] = sum / (radius*2+1);
 		}
+
+		terrainPoints = newTerrainPoints;
+
+		//console.log(terrainPoints.length, newTerrainPoints.length);
 	}
 
 	function render(){
-		
-		var backgroundGradient = context.createLinearGradient(0, 0, 0, canvas.height);
-		backgroundGradient.addColorStop(0, "#883300");
-		backgroundGradient.addColorStop(1, "#CC8800");
-		context.fillStyle = backgroundGradient;
-		context.fillRect(0, 0, canvas.width, canvas.height);
 		
 		var i = terrainPoints.length;
 		
@@ -67,8 +73,16 @@ function generateTerrain(canvas, context){
 			);
 		}
 		context.closePath();
+
+		var gradient = context.createLinearGradient(0, 0, 0, canvas.height);
+		gradient.addColorStop(0, "#819e3b");
+		gradient.addColorStop(1, "#62782d");
+		context.fillStyle = gradient;
+
+		context.strokeStyle = "#113300";
+		context.lineWidth = 2;
+		//context.stroke();
 		
-		context.fillStyle = "#000000";
 		context.fill();
 	}
 
@@ -76,9 +90,9 @@ function generateTerrain(canvas, context){
 		while(terrainPoints.length < terrainWidth){
 			addTerrainPoints();
 		}
-
-		render();
 	}
+
+	return terrainPoints;
 
 }
 

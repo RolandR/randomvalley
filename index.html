@@ -20,15 +20,23 @@
 				image-rendering: pixelated;
 				background-color: #EEEFFF;
 			}
+			#prerenderCanvas{
+				visibility: hidden;
+			}
 		</style>
 	</head>
 	<body>
 		<canvas id="renderCanvas">
 			Needs more canvas
 		</canvas>
+		<canvas id="prerenderCanvas">
+			Needs more canvas
+		</canvas>
 	</body>
 	<script type="text/javascript" src="./terrain.js"></script>
 	<script type="text/javascript" src="./evergreen.js"></script>
+	<script type="text/javascript" src="./skygradient.js"></script>
+	<script type="text/javascript" src="./cloud.js"></script>
 
 	<script type="text/javascript" src="./main.js"></script>
 </html>
