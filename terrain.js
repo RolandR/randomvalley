@@ -1,9 +1,8 @@
 function generateTerrain(canvas, context, settings){
 
-	var {haze, terrainPoints, smoothness, c0} = settings;
+	var {haze, terrainPoints, smoothness, c0, ruggedness} = settings;
 	
 	var terrainBorders = [0, canvas.width];
-	var ruggedness = 1; // lower for smoother terrain, higher for more extreme
 	var terrainWidth = Math.abs(terrainBorders[0] - terrainBorders[1]);
 
 	generateStep();
@@ -43,7 +42,7 @@ function generateTerrain(canvas, context, settings){
 		//console.log(terrainPoints.length, newTerrainPoints.length);
 	}
 
-	function erode(value, iterations){
+	/*function erode(value, iterations){
 
 		var len = terrainPoints.length;
 
@@ -67,7 +66,7 @@ function generateTerrain(canvas, context, settings){
 			);
 			context.stroke();
 		}
-	}
+	}*/
 
 	function render(){
 		
@@ -101,7 +100,67 @@ function generateTerrain(canvas, context, settings){
 			);
 		}
 		context.closePath();
+
+		context.fillStyle = "#FFFFFF";
 		
+		context.fill();
+
+		generateHeightmap();
+	}
+
+	function generateHeightmap(){
+		var image = context.getImageData(0, 0, canvas.width, canvas.height);
+
+		var heightmap = new Float32Array(canvas.width * canvas.height);
+		heightmap.fill(255);
+
+		for(var i = 0; i < heightmap.length; i++){
+			var x = i % canvas.width;
+			var y = ~~(i / canvas.width);
+
+			if(image.data[i*4+3] > 0){
+				var above = 255;
+				
+				if(typeof image.data[i*4-canvas.width*4] == "undefined"){
+					above = 0;
+				} else if(image.data[i*4-canvas.width*4] == 0){
+					above = 0;
+				} else {
+					above = heightmap[i-canvas.width];
+
+					if(Math.random() < 0.6){
+						var directionNoise = (noise.simplex2(x/20, y/20) * noise.simplex2(x/100, y/100))/2;
+						
+						if(x != 0){
+							above = (above*(1-directionNoise) + heightmap[i-canvas.width-1]*(1+directionNoise)) / 2;
+						}
+						if(x != canvas.width){
+							above = (above*(1+directionNoise) + heightmap[i-canvas.width+1]*(1-directionNoise)) / 2;
+						}
+					}
+				}
+
+				var color = above + 1;
+
+				color = color + (noise.simplex2(x/70, y/70)*0.5);
+
+				heightmap[i] = color;
+			} else {
+				heightmap[i] = 0;
+			}
+		}
+
+		console.log(heightmap);
+
+		generateHillshade(heightmap);
+	}
+
+	function generateHillshade(heightmap){
+		var hillshadeCanvas = document.createElement("canvas");
+		hillshadeCanvas.width = canvas.width;
+		hillshadeCanvas.height = canvas.height;
+		var hillshadeContext = hillshadeCanvas.getContext("2d");
+
 		var c1 = [];
 		
 		for(var i in c0){
@@ -125,13 +184,35 @@ function generateTerrain(canvas, context, settings){
 		var gradient = context.createLinearGradient(0, 0, 0, canvas.height);
 		gradient.addColorStop(0, c0);
 		gradient.addColorStop(1, c1);
-		context.fillStyle = gradient;
+		hillshadeContext.fillStyle = gradient;
+		hillshadeContext.fillRect(0, 0, hillshadeCanvas.width, hillshadeCanvas.height);
 
-		context.strokeStyle = "#113300";
-		context.lineWidth = 2;
-		//context.stroke();
-		
-		context.fill();
+		var hillshadeImage = hillshadeContext.getImageData(0, 0, canvas.width, canvas.height);
+
+		for(var i = 0; i < heightmap.length; i++){
+
+			if(heightmap[i] != 0){
+				var x = i % canvas.width;
+				var y = ~~(i / canvas.width);
+
+				var grade = 0;
+				if(x != 0){
+					grade = heightmap[i] - heightmap[i-1];
+				}
+
+				grade = (grade+5) * 30;
+
+				grade = 2*grade / 255 - 0.5;
+
+				hillshadeImage.data[i*4  ] *= grade;
+				hillshadeImage.data[i*4+1] *= grade;
+				hillshadeImage.data[i*4+2] *= grade;
+			} else {
+				hillshadeImage.data[i*4+3] = 0;
+			}
+		}
+
+		context.putImageData(hillshadeImage, 0, 0);
 	}
 
 	function generateStep(){
