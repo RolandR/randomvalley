@@ -43,6 +43,7 @@ function buildLandscape(){
 		,smoothness: 5
 		,c0: [100, 100, 100]
 		,ruggedness: 1
+		,scale: scale
 	});
 	render8bit();
 
@@ -56,6 +57,7 @@ function buildLandscape(){
 		,smoothness: 100
 		,c0: [100, 120, 40]
 		,ruggedness: 0.5
+		,scale: scale
 	});
 	render8bit();
 
@@ -65,10 +67,11 @@ function buildLandscape(){
 		,smoothness: 200
 		,c0: [129, 158, 62]
 		,ruggedness: 0.3
+		,scale: scale
 	});
 	render8bit();
 
-	/*var nextTree = 0;
+	var nextTree = 0;
 	for(var i = ~~(terrain.length/5); i < terrain.length/2; i++){
 		if(nextTree <= 0){
 			generateEvergreen(preCanvas, preContext, {
@@ -82,7 +85,7 @@ function buildLandscape(){
 			nextTree = Math.random() * 100 * scale + 20 * scale;
 		}
 		nextTree--;
-	}*/
+	}
 
 
 	function render8bit(){

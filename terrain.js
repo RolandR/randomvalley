@@ -1,6 +1,16 @@
 function generateTerrain(canvas, context, settings){
 
-	var {haze, terrainPoints, smoothness, c0, ruggedness} = settings;
+	var {
+		haze,
+		terrainPoints,
+		smoothness,
+		c0,
+		ruggedness,
+		scale
+		
+	} = settings;
+
+	smoothness = smoothness * scale;
 	
 	var terrainBorders = [0, canvas.width];
 	var terrainWidth = Math.abs(terrainBorders[0] - terrainBorders[1]);
@@ -112,14 +122,14 @@ function generateTerrain(canvas, context, settings){
 		var image = context.getImageData(0, 0, canvas.width, canvas.height);
 
 		var heightmap = new Float32Array(canvas.width * canvas.height);
-		heightmap.fill(255);
+		heightmap.fill(0);
 
 		for(var i = 0; i < heightmap.length; i++){
 			var x = i % canvas.width;
 			var y = ~~(i / canvas.width);
 
 			if(image.data[i*4+3] > 0){
-				var above = 255;
+				var above = 0;
 				
 				if(typeof image.data[i*4-canvas.width*4] == "undefined"){
 					above = 0;
@@ -129,7 +139,14 @@ function generateTerrain(canvas, context, settings){
 					above = heightmap[i-canvas.width];
 
 					if(Math.random() < 0.6){
-						var directionNoise = (noise.simplex2(x/20, y/20) * noise.simplex2(x/100, y/100))/2;
+						var directionNoise =
+							  noise.simplex2(x/(60*scale), y/(60*scale))
+							* noise.simplex2(x/(300*scale), y/(300*scale));
+							
+						directionNoise += (heightmap[i-canvas.width-1] - heightmap[i-canvas.width+1])*0.1;
+
+						directionNoise = Math.min(directionNoise, 0.5);
+						directionNoise = Math.max(directionNoise, -0.5);
 						
 						if(x != 0){
 							above = (above*(1-directionNoise) + heightmap[i-canvas.width-1]*(1+directionNoise)) / 2;
@@ -140,17 +157,34 @@ function generateTerrain(canvas, context, settings){
 					}
 				}
 
-				var color = above + 1;
+				var height = above + (1/(scale*3));
 
-				color = color + (noise.simplex2(x/70, y/70)*0.5);
+				height = height + (noise.simplex2(x/70, y/70)*0.4);
 
-				heightmap[i] = color;
+				heightmap[i] = height;
 			} else {
 				heightmap[i] = 0;
 			}
 		}
 
-		console.log(heightmap);
+		// Smoothen it out
+		
+		var smoothHeightmap = new Float32Array(canvas.width * canvas.height);
+		for(var i = 0; i < heightmap.length; i++){
+			var sum = 0;
+			var radius = ~~(smoothness/4);
+			for(var a = 0-radius; a <= radius; a++){
+				if(typeof heightmap[i+a] == "undefined"/* || heightmap[i+a] == 0*/){
+					sum += heightmap[i];
+				} else {
+					sum += heightmap[i+a];
+				}
+			}
+
+			smoothHeightmap[i] = sum / (radius*2+1);
+		}
+
+		heightmap.set(smoothHeightmap);
 
 		generateHillshade(heightmap);
 	}
@@ -202,14 +236,22 @@ function generateTerrain(canvas, context, settings){
 
 				grade = (grade+5) * 30;
 
+				grade = Math.min(255, grade);
+				grade = Math.max(-255, grade);
+
 				grade = 2*grade / 255 - 0.5;
 
 				hillshadeImage.data[i*4  ] *= grade;
 				hillshadeImage.data[i*4+1] *= grade;
 				hillshadeImage.data[i*4+2] *= grade;
+				
 			} else {
 				hillshadeImage.data[i*4+3] = 0;
 			}
+
+			/*hillshadeImage.data[i*4  ] = heightmap[i];
+			hillshadeImage.data[i*4+1] = heightmap[i];
+			hillshadeImage.data[i*4+2] = heightmap[i];*/
 		}
 
 		context.putImageData(hillshadeImage, 0, 0);
