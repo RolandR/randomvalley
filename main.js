@@ -44,10 +44,12 @@ function buildLandscape(){
 		,c0: [100, 100, 100]
 		,ruggedness: 1
 		,scale: scale
+		,snow: true
+		,snowness: 0.2
 	});
 	render8bit();
 
-	//return;
+	return;
 
 	
 
@@ -58,6 +60,7 @@ function buildLandscape(){
 		,c0: [100, 120, 40]
 		,ruggedness: 0.5
 		,scale: scale
+		,snow: false
 	});
 	render8bit();
 
@@ -68,6 +71,7 @@ function buildLandscape(){
 		,c0: [129, 158, 62]
 		,ruggedness: 0.3
 		,scale: scale
+		,snow: false
 	});
 	render8bit();
 

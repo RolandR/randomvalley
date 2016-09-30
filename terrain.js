@@ -6,11 +6,14 @@ function generateTerrain(canvas, context, settings){
 		smoothness,
 		c0,
 		ruggedness,
-		scale
+		scale,
+		snow,
+		snowness
 		
 	} = settings;
 
 	smoothness = smoothness * scale;
+	snowness = snowness / scale;
 	
 	var terrainBorders = [0, canvas.width];
 	var terrainWidth = Math.abs(terrainBorders[0] - terrainBorders[1]);
@@ -111,10 +114,39 @@ function generateTerrain(canvas, context, settings){
 		}
 		context.closePath();
 
-		context.fillStyle = "#FFFFFF";
+
+		var c1 = [];
+		var ct = c0;
 		
+		for(var i in c0){
+			c0[i] = ct[i] + 100;
+		}
+		
+		for(var i in c0){
+			c1[i] = c0[i] - 200;
+		}
+		
+		var cHaze = [230, 235, 255];
+
+		for(var i in c0){
+			c0[i] = (c0[i] + haze*cHaze[i]) / (1+haze);
+			c0[i] = ~~Math.min(c0[i], 255);
+		}
+		for(var i in c1){
+			c1[i] = (c1[i] + haze*cHaze[i]) / (1+haze);
+			c1[i] = ~~Math.min(c1[i], 255);
+		}
+
+		c0 = "rgb("+c0[0]+", "+c0[1]+", "+c0[2]+")";
+		c1 = "rgb("+c1[0]+", "+c1[1]+", "+c1[2]+")";
+
+		var gradient = context.createLinearGradient(0, 0, 0, canvas.height);
+		gradient.addColorStop(0, c0);
+		gradient.addColorStop(1, c1);
+		context.fillStyle = gradient;
 		context.fill();
 
+		
 		generateHeightmap();
 	}
 
@@ -159,7 +191,7 @@ function generateTerrain(canvas, context, settings){
 
 				var height = above + (1/(scale*3));
 
-				height = height + (noise.simplex2(x/70, y/70)*0.4);
+				height = height + (noise.simplex2(x/(200*scale), y/(200*scale))*0.4);
 
 				heightmap[i] = height;
 			} else {
@@ -190,44 +222,32 @@ function generateTerrain(canvas, context, settings){
 	}
 
 	function generateHillshade(heightmap){
-		var hillshadeCanvas = document.createElement("canvas");
-		hillshadeCanvas.width = canvas.width;
-		hillshadeCanvas.height = canvas.height;
-		var hillshadeContext = hillshadeCanvas.getContext("2d");
 
-		var c1 = [];
-		
-		for(var i in c0){
-			c1[i] = c0[i] - 20;
-		}
-		
-		var cHaze = [230, 235, 255];
-
-		for(var i in c0){
-			c0[i] = (c0[i] + haze*cHaze[i]) / (1+haze);
-			c0[i] = ~~Math.min(c0[i], 255);
-		}
-		for(var i in c1){
-			c1[i] = (c1[i] + haze*cHaze[i]) / (1+haze);
-			c1[i] = ~~Math.min(c1[i], 255);
-		}
-
-		c0 = "rgb("+c0[0]+", "+c0[1]+", "+c0[2]+")";
-		c1 = "rgb("+c1[0]+", "+c1[1]+", "+c1[2]+")";
-
-		var gradient = context.createLinearGradient(0, 0, 0, canvas.height);
-		gradient.addColorStop(0, c0);
-		gradient.addColorStop(1, c1);
-		hillshadeContext.fillStyle = gradient;
-		hillshadeContext.fillRect(0, 0, hillshadeCanvas.width, hillshadeCanvas.height);
-
-		var hillshadeImage = hillshadeContext.getImageData(0, 0, canvas.width, canvas.height);
+		var hillshadeImage = context.getImageData(0, 0, canvas.width, canvas.height);
 
 		for(var i = 0; i < heightmap.length; i++){
 
 			if(heightmap[i] != 0){
 				var x = i % canvas.width;
 				var y = ~~(i / canvas.width);
+
+				if(snow){
+					var sum = 0;
+					var radius = 5;
+					for(var a = 0-radius; a <= radius; a++){
+						if(typeof heightmap[i+a] == "undefined"/* || heightmap[i+a] == 0*/){
+							sum += heightmap[i];
+						} else {
+							sum += heightmap[i+a];
+						}
+					}
+					var average = sum / (radius*2+1);
+					if(heightmap[i] < average*(1+snowness/100)){
+						hillshadeImage.data[i*4  ] = 255;
+						hillshadeImage.data[i*4+1] = 255;
+						hillshadeImage.data[i*4+2] = 255;
+					}
+				}
 
 				var grade = 0;
 				if(x != 0){
