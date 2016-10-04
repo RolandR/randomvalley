@@ -14,7 +14,7 @@ function buildLandscape(){
 	var width = Math.max(document.documentElement.clientWidth, window.innerWidth || 0);
 	var height = Math.max(document.documentElement.clientHeight, window.innerHeight || 0);
 
-	var scale = 1/3;
+	var scale = 1;
 
 	canvas.width = width*scale;
 	canvas.height = height*scale;
@@ -37,6 +37,11 @@ function buildLandscape(){
 		render8bit();
 	}
 
+	generateHouse(preCanvas, preContext, {scale: scale});
+	render8bit();
+
+	return;
+
 	generateTerrain(preCanvas, preContext, {
 		 haze: 0.7
 		,terrainPoints: [canvas.height/4, canvas.height/2, canvas.height/4]
@@ -48,21 +53,21 @@ function buildLandscape(){
 		,snowness: 0.2
 	});
 	render8bit();
-
-	return;
-
 	
 
 	generateTerrain(preCanvas, preContext, {
 		 haze: 0.5
 		,terrainPoints: [canvas.height/2, 2*canvas.height/3, canvas.height/2]
 		,smoothness: 100
-		,c0: [100, 120, 40]
+		,c0: [115, 121, 80]
 		,ruggedness: 0.5
 		,scale: scale
 		,snow: false
+		,snowness: -0.2
 	});
 	render8bit();
+
+	//return;
 
 	var terrain = generateTerrain(preCanvas, preContext, {
 		 haze: 0
@@ -94,7 +99,7 @@ function buildLandscape(){
 
 	function render8bit(){
 		
-		var image = preContext.getImageData(0, 0, preCanvas.width, preCanvas.height);
+		/*var image = preContext.getImageData(0, 0, preCanvas.width, preCanvas.height);
 
 		var colorResolution = 16;
 
@@ -119,7 +124,7 @@ function buildLandscape(){
 			}
 		};
 
-		preContext.putImageData(image, 0, 0);
+		preContext.putImageData(image, 0, 0);*/
 		context.drawImage(preCanvas, 0, 0);
 
 		preContext.clearRect(0, 0, preCanvas.width, preCanvas.height);

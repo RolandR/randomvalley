@@ -119,14 +119,15 @@ function generateTerrain(canvas, context, settings){
 		var ct = c0;
 		
 		for(var i in c0){
-			c0[i] = ct[i] + 100;
+			c0[i] = ct[i] + 20;
 		}
 		
 		for(var i in c0){
-			c1[i] = c0[i] - 200;
+			c1[i] = c0[i] - 20;
 		}
 		
-		var cHaze = [230, 235, 255];
+		/*var cHaze = [230, 235, 255];
+		var cHaze = [0, 0, 0];
 
 		for(var i in c0){
 			c0[i] = (c0[i] + haze*cHaze[i]) / (1+haze);
@@ -135,7 +136,7 @@ function generateTerrain(canvas, context, settings){
 		for(var i in c1){
 			c1[i] = (c1[i] + haze*cHaze[i]) / (1+haze);
 			c1[i] = ~~Math.min(c1[i], 255);
-		}
+		}*/
 
 		c0 = "rgb("+c0[0]+", "+c0[1]+", "+c0[2]+")";
 		c1 = "rgb("+c1[0]+", "+c1[1]+", "+c1[2]+")";
@@ -231,21 +232,27 @@ function generateTerrain(canvas, context, settings){
 				var x = i % canvas.width;
 				var y = ~~(i / canvas.width);
 
-				if(snow){
-					var sum = 0;
-					var radius = 5;
-					for(var a = 0-radius; a <= radius; a++){
-						if(typeof heightmap[i+a] == "undefined"/* || heightmap[i+a] == 0*/){
-							sum += heightmap[i];
-						} else {
-							sum += heightmap[i+a];
-						}
+				var sum = 0;
+				var radius = 5;
+				for(var a = 0-radius; a <= radius; a++){
+					if(typeof heightmap[i+a] == "undefined"/* || heightmap[i+a] == 0*/){
+						sum += heightmap[i];
+					} else {
+						sum += heightmap[i+a];
 					}
-					var average = sum / (radius*2+1);
+				}
+				var average = sum / (radius*2+1);
+				if(snow){
 					if(heightmap[i] < average*(1+snowness/100)){
-						hillshadeImage.data[i*4  ] = 255;
-						hillshadeImage.data[i*4+1] = 255;
-						hillshadeImage.data[i*4+2] = 255;
+						hillshadeImage.data[i*4  ] = 200;
+						hillshadeImage.data[i*4+1] = 200;
+						hillshadeImage.data[i*4+2] = 210;
+					}
+				} else {
+					if(heightmap[i] < average*(1+snowness/100) && noise.simplex2(x/(20*scale), y/(10*scale)) > 0){
+						hillshadeImage.data[i*4  ] = 140;
+						hillshadeImage.data[i*4+1] = 140;
+						hillshadeImage.data[i*4+2] = 130;
 					}
 				}
 
@@ -254,16 +261,18 @@ function generateTerrain(canvas, context, settings){
 					grade = heightmap[i] - heightmap[i-1];
 				}
 
+				grade = grade * scale;
+
 				grade = (grade+5) * 30;
 
 				grade = Math.min(255, grade);
 				grade = Math.max(-255, grade);
 
-				grade = 2*grade / 255 - 0.5;
+				grade = 2*grade / 255 - 1;
 
-				hillshadeImage.data[i*4  ] *= grade;
-				hillshadeImage.data[i*4+1] *= grade;
-				hillshadeImage.data[i*4+2] *= grade;
+				hillshadeImage.data[i*4  ] *= 1+grade;
+				hillshadeImage.data[i*4+1] *= 1+grade;
+				hillshadeImage.data[i*4+2] *= 1+grade;
 				
 			} else {
 				hillshadeImage.data[i*4+3] = 0;
