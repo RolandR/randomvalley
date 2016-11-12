@@ -8,7 +8,8 @@ function generateTerrain(canvas, context, settings){
 		ruggedness,
 		scale,
 		snow,
-		snowness
+		snowness,
+		hillshadeIntensity
 		
 	} = settings;
 
@@ -114,37 +115,9 @@ function generateTerrain(canvas, context, settings){
 		}
 		context.closePath();
 
-
-		var c1 = [];
-		var ct = c0;
-		
-		for(var i in c0){
-			c0[i] = ct[i] + 20;
-		}
-		
-		for(var i in c0){
-			c1[i] = c0[i] - 20;
-		}
-		
-		/*var cHaze = [230, 235, 255];
-		var cHaze = [0, 0, 0];
-
-		for(var i in c0){
-			c0[i] = (c0[i] + haze*cHaze[i]) / (1+haze);
-			c0[i] = ~~Math.min(c0[i], 255);
-		}
-		for(var i in c1){
-			c1[i] = (c1[i] + haze*cHaze[i]) / (1+haze);
-			c1[i] = ~~Math.min(c1[i], 255);
-		}*/
-
 		c0 = "rgb("+c0[0]+", "+c0[1]+", "+c0[2]+")";
-		c1 = "rgb("+c1[0]+", "+c1[1]+", "+c1[2]+")";
-
-		var gradient = context.createLinearGradient(0, 0, 0, canvas.height);
-		gradient.addColorStop(0, c0);
-		gradient.addColorStop(1, c1);
-		context.fillStyle = gradient;
+		
+		context.fillStyle = c0;
 		context.fill();
 
 		
@@ -190,7 +163,7 @@ function generateTerrain(canvas, context, settings){
 					}
 				}
 
-				var height = above + (1/(scale*3));
+				var height = above + 1;
 
 				height = height + (noise.simplex2(x/(200*scale), y/(200*scale))*0.4);
 
@@ -205,7 +178,7 @@ function generateTerrain(canvas, context, settings){
 		var smoothHeightmap = new Float32Array(canvas.width * canvas.height);
 		for(var i = 0; i < heightmap.length; i++){
 			var sum = 0;
-			var radius = ~~(smoothness/4);
+			var radius = ~~(smoothness/8);
 			for(var a = 0-radius; a <= radius; a++){
 				if(typeof heightmap[i+a] == "undefined"/* || heightmap[i+a] == 0*/){
 					sum += heightmap[i];
@@ -233,7 +206,7 @@ function generateTerrain(canvas, context, settings){
 				var y = ~~(i / canvas.width);
 
 				var sum = 0;
-				var radius = 5;
+				var radius = 2/scale;
 				for(var a = 0-radius; a <= radius; a++){
 					if(typeof heightmap[i+a] == "undefined"/* || heightmap[i+a] == 0*/){
 						sum += heightmap[i];
@@ -249,10 +222,13 @@ function generateTerrain(canvas, context, settings){
 						hillshadeImage.data[i*4+2] = 210;
 					}
 				} else {
-					if(heightmap[i] < average*(1+snowness/100) && noise.simplex2(x/(20*scale), y/(10*scale)) > 0){
-						hillshadeImage.data[i*4  ] = 140;
-						hillshadeImage.data[i*4+1] = 140;
-						hillshadeImage.data[i*4+2] = 130;
+					var n = noise.simplex2(x/(20*scale), y/(10*scale)) * 0.7;
+					n = n * scale;
+					
+					if(heightmap[i] + n < average*(1+snowness/(100))){
+						hillshadeImage.data[i*4  ] = 140 + n*50;
+						hillshadeImage.data[i*4+1] = 140 + n*50;
+						hillshadeImage.data[i*4+2] = 130 + n*50;
 					}
 				}
 
@@ -260,8 +236,8 @@ function generateTerrain(canvas, context, settings){
 				if(x != 0){
 					grade = heightmap[i] - heightmap[i-1];
 				}
-
-				grade = grade * scale;
+				
+				grade = grade * (hillshadeIntensity/(scale+1));
 
 				grade = (grade+5) * 30;
 
