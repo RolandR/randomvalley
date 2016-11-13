@@ -3,13 +3,8 @@ buildLandscape();
 
 function buildLandscape(){
 
-	var canvas = document.getElementById("renderCanvas");
-	var context = canvas.getContext("2d");
-
 	var preCanvas = document.getElementById("prerenderCanvas");
 	var preContext = preCanvas.getContext("2d");
-
-	context.imageSmoothingEnabled = false;
 
 	var width = Math.max(document.documentElement.clientWidth, window.innerWidth || 0);
 	var height = Math.max(document.documentElement.clientHeight, window.innerHeight || 0);
@@ -22,22 +17,26 @@ function buildLandscape(){
 	var lightColor = [120, 130, 140];
 	var hazeColor = "100, 110, 120";*/
 
-	/*
+	
 	// Morning
 	var sunBrightness = 0.5;
 	var lightColor = [240, 200, 180];
-	var hazeColor = "255, 230, 200";*/
+	var hazeColor = "255, 230, 200";
 	
-	
+	/*
 	// Day
 	var sunBrightness = 1;
 	var lightColor = [255, 255, 255];
-	var hazeColor = "230, 240, 255";
+	var hazeColor = "230, 240, 255";*/
 
 	var hazeIntensity = 1;
 
-	canvas.width = width*scale;
-	canvas.height = height*scale;
+	var cloudiness = 3;
+	var cloudHeight = 0;
+
+	var layers = 6;
+	var layer = 0;
+
 	preCanvas.width = width*scale;
 	preCanvas.height = height*scale;
 
@@ -49,25 +48,18 @@ function buildLandscape(){
 	generateHaze(preCanvas, preContext, {intensity: 0.8 * hazeIntensity, scale: scale, hazeColor: hazeColor});
 	render8bit();
 	
-	for(var i = 0; i < ~~(Math.random()*2); i++){
-		generateCloud(preCanvas, preContext, {
-			 cx: Math.random() * canvas.width
-			,cy: Math.random() * canvas.height/2
-			,count: 3 + ~~(Math.random()*5)
-			,initialRadius: 60*scale
-		});
-	}
-	generateHaze(preCanvas, preContext, {intensity: 1.2 * hazeIntensity, scale: scale, hazeColor: hazeColor});
-	render8bit();
+	addClouds(layer);
 
 	/*generateHouse(preCanvas, preContext, {scale: scale});
 	render8bit();*/
 
 	//return;
 
+	layer++;
+
 	generateTerrain(preCanvas, preContext, {
 		 haze: 0.7
-		,terrainPoints: [canvas.height/4 - Math.random()*30, Math.random() * canvas.height/4 + canvas.height/4, canvas.height/4 - Math.random()*30]
+		,terrainPoints: [preCanvas.height/4 - Math.random()*30, Math.random() * preCanvas.height/4 + preCanvas.height/4, preCanvas.height/4 - Math.random()*30]
 		,smoothness: 0
 		,c0: [100, 100, 100]
 		,ruggedness: 0.5
@@ -81,20 +73,13 @@ function buildLandscape(){
 	generateHaze(preCanvas, preContext, {intensity: 1.2 * hazeIntensity, scale: scale, hazeColor: hazeColor});
 	render8bit();
 
-	for(var i = 0; i < ~~(Math.random()*2); i++){
-		generateCloud(preCanvas, preContext, {
-			 cx: Math.random() * canvas.width
-			,cy: Math.random() * canvas.height/2
-			,count: 3 + ~~(Math.random()*5)
-			,initialRadius: 60*scale
-		});
-	}
-	generateHaze(preCanvas, preContext, {intensity: 0.8 * hazeIntensity, scale: scale, hazeColor: hazeColor});
-	render8bit();
+	addClouds(layer);
+
+	layer++;
 
 	generateTerrain(preCanvas, preContext, {
 		 haze: 0.7
-		,terrainPoints: [canvas.height/4, Math.random() * canvas.height/4 + canvas.height/4, canvas.height/4]
+		,terrainPoints: [preCanvas.height/4, Math.random() * preCanvas.height/4 + preCanvas.height/4, preCanvas.height/4]
 		,smoothness: 0
 		,c0: [100, 100, 100]
 		,ruggedness: 0.5
@@ -108,20 +93,13 @@ function buildLandscape(){
 	generateHaze(preCanvas, preContext, {intensity: 0.8 * hazeIntensity, scale: scale, hazeColor: hazeColor});
 	render8bit();
 
-	for(var i = 0; i < ~~(Math.random()*2); i++){
-		generateCloud(preCanvas, preContext, {
-			 cx: Math.random() * canvas.width
-			,cy: Math.random() * canvas.height/2
-			,count: 3 + ~~(Math.random()*5)
-			,initialRadius: 60*scale
-		});
-	}
-	generateHaze(preCanvas, preContext, {intensity: 0.8 * hazeIntensity, scale: scale, hazeColor: hazeColor});
-	render8bit();
+	addClouds(layer);
 
+
+	layer++;
 	generateTerrain(preCanvas, preContext, {
 		 haze: 0.7
-		,terrainPoints: [canvas.height/4 + Math.random()*50, Math.random() * canvas.height/4 + canvas.height/4, canvas.height/4 + Math.random()*50]
+		,terrainPoints: [preCanvas.height/4 + Math.random()*50, Math.random() * preCanvas.height/4 + preCanvas.height/4, preCanvas.height/4 + Math.random()*50]
 		,smoothness: 0
 		,c0: [100, 100, 100]
 		,ruggedness: 0.5
@@ -135,22 +113,14 @@ function buildLandscape(){
 	generateHaze(preCanvas, preContext, {intensity: 0.4 * hazeIntensity, scale: scale, hazeColor: hazeColor});
 	render8bit();
 
-	for(var i = 0; i < ~~(Math.random()*2); i++){
-		generateCloud(preCanvas, preContext, {
-			 cx: Math.random() * canvas.width
-			,cy: Math.random() * canvas.height/2
-			,count: 3 + ~~(Math.random()*5)
-			,initialRadius: 60*scale
-		});
-	}
-	generateHaze(preCanvas, preContext, {intensity: 0.3 * hazeIntensity, scale: scale, hazeColor: hazeColor});
-	render8bit();
+	addClouds(layer);
 
 	//return;
-	
+
+	layer++;
 	generateTerrain(preCanvas, preContext, {
 		 haze: 0.5
-		,terrainPoints: [canvas.height/2, 2*canvas.height/3, canvas.height/2]
+		,terrainPoints: [preCanvas.height/2, 2*preCanvas.height/3, preCanvas.height/2]
 		,smoothness: 100
 		,c0: [115, 121, 80]
 		,ruggedness: 0.5
@@ -159,14 +129,32 @@ function buildLandscape(){
 		,snowness: -0.2
 		,hillshadeIntensity: 1 * sunBrightness
 	});
-	
-
 	generateHaze(preCanvas, preContext, {intensity: 0.2 * hazeIntensity, scale: scale, hazeColor: hazeColor});
 	render8bit();
 
+	addClouds(layer);
+
+	layer++;
+	generateTerrain(preCanvas, preContext, {
+		 haze: 0.25
+		,terrainPoints: [2*preCanvas.height/3, 4*preCanvas.height/5, 2*preCanvas.height/3]
+		,smoothness: 250
+		,c0: [120, 140, 60]
+		,ruggedness: 0.4
+		,scale: scale
+		,snow: false
+		,snowness: -0.7
+		,hillshadeIntensity: 1 * sunBrightness
+	});
+	generateHaze(preCanvas, preContext, {intensity: 0.2 * hazeIntensity, scale: scale, hazeColor: hazeColor});
+	render8bit();
+
+	addClouds(layer);
+
+	layer++;
 	var terrain = generateTerrain(preCanvas, preContext, {
 		 haze: 0
-		,terrainPoints: [4*canvas.height/5, 5*canvas.height/6, 4*canvas.height/5]
+		,terrainPoints: [4*preCanvas.height/5, 5*preCanvas.height/6, 4*preCanvas.height/5]
 		,smoothness: 300
 		,c0: [126, 154, 70]
 		,ruggedness: 0.3
@@ -193,6 +181,21 @@ function buildLandscape(){
 			nextTree = Math.random() * 100 * scale + 20 * scale;
 		}
 		nextTree--;
+	}
+
+	function addClouds(layer){
+		for(var i = 0; i < ~~(Math.random()*cloudiness); i++){
+			generateCloud(preCanvas, preContext, {
+				 cx: Math.random() * preCanvas.width
+				,cy: preCanvas.height/2 - (layer/layers) * preCanvas.height/2 + (Math.random()-0.5) * preCanvas.height/6 - cloudHeight
+				,count: 3 + ~~(Math.random()*5)
+				,initialRadius: 60*scale
+			});
+		}
+		generateHaze(preCanvas, preContext, {intensity: 0.1 * ((layers+1) / (layer+1)) * hazeIntensity, scale: scale, hazeColor: hazeColor});
+		var cloud = render8bit();
+		var left = 0;
+		setInterval(function(){cloud.style.left = left+"px"; left += 1/scale; }, 800 + 800 * Math.random());
 	}
 
 
@@ -231,10 +234,18 @@ function buildLandscape(){
 			}
 		};
 
+		var canvas = document.createElement("canvas");
+		canvas.height = height*scale;
+		canvas.width = width*scale;
+		document.getElementById("canvasDiv").appendChild(canvas);
+		var context = canvas.getContext("2d");
+
 		preContext.putImageData(image, 0, 0);
 		context.drawImage(preCanvas, 0, 0);
 
 		preContext.clearRect(0, 0, preCanvas.width, preCanvas.height);
+
+		return canvas;
 		
 	}
 

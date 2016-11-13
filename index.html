@@ -18,10 +18,14 @@
 			body{
 				background-color: #000000;
 			}
+			#canvasDiv{
+				height: 100%;
+				background-color: #333333;
+			}
 			canvas{
 				height: 100%;
 				image-rendering: pixelated;
-				background-color: #333333;
+				position: absolute;
 			}
 			#prerenderCanvas{
 				visibility: hidden;
@@ -29,9 +33,9 @@
 		</style>
 	</head>
 	<body>
-		<canvas id="renderCanvas">
-			Needs more canvas
-		</canvas>
+		<div id="canvasDiv">
+
+		</div>
 		<canvas id="prerenderCanvas">
 			Needs more canvas
 		</canvas>
