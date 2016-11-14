@@ -13,26 +13,50 @@ function buildLandscape(){
 
 	var scale = 1/3;
 
-	/*
-	/Night
-	var sunBrightness = 0.3;
-	var lightColor = [120, 130, 140];
-	var hazeColor = "100, 110, 120";
-	var cirrusColor = "#FFFFFF";*/
+	var daytimeProbabilites = [
+		 1 // Night
+		,2 // Morning
+		,3 // Day
+	]
 
-	/*
-	// Morning
-	var sunBrightness = 0.5;
-	var lightColor = [240, 200, 180];
-	var hazeColor = "255, 230, 200";
-	var cirrusColor = "#FF7722";*/
-	
-	
-	// Day
-	var sunBrightness = 1;
-	var lightColor = [255, 255, 255];
-	var hazeColor = "230, 240, 255";
-	var cirrusColor = "#FFFFFF";
+	var daytimeProbabilitiesSum = 0;
+	for(var i in daytimeProbabilites){
+		daytimeProbabilitiesSum += daytimeProbabilites[i];
+	}
+	for(var i in daytimeProbabilites){
+		daytimeProbabilites[i] = daytimeProbabilites[i] / daytimeProbabilitiesSum;
+
+		if(i != 0){
+			daytimeProbabilites[i] += daytimeProbabilites[i-1];
+		}
+	}
+
+	var randTime = Math.random();
+
+	var sunBrightness;
+	var lightColor;
+	var hazeColor;
+	var cirrusColor;
+
+	if(randTime < daytimeProbabilites[0]){
+		//Night
+		sunBrightness = 0.3;
+		lightColor = [120, 130, 140];
+		hazeColor = "100, 110, 120";
+		cirrusColor = "#FFFFFF";
+	} else if(randTime < daytimeProbabilites[1]){
+		// Morning
+		sunBrightness = 0.5;
+		lightColor = [240, 200, 180];
+		hazeColor = "255, 230, 200";
+		cirrusColor = "#FF7722";
+	} else {
+		// Day
+		sunBrightness = 1;
+		lightColor = [255, 255, 255];
+		hazeColor = "230, 240, 255";
+		cirrusColor = "#FFFFFF";
+	}
 	
 
 	var hazeIntensity = 1;

@@ -218,9 +218,6 @@ function generateTerrain(canvas, context, settings){
 		var radius = ~~(2/scale);
 		var averagingWidth = 2*radius+1;
 
-		console.log(radius);
-		console.log(averagingWidth);
-
 		for(var y = 0; y < canvas.height; y++){
 
 			var sum = 0;
