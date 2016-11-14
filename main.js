@@ -15,24 +15,28 @@ function buildLandscape(){
 	/Night
 	var sunBrightness = 0.3;
 	var lightColor = [120, 130, 140];
-	var hazeColor = "100, 110, 120";*/
+	var hazeColor = "100, 110, 120";
+	var cirrusColor = "#FFFFFF";*/
 
 	
 	// Morning
 	var sunBrightness = 0.5;
 	var lightColor = [240, 200, 180];
 	var hazeColor = "255, 230, 200";
+	var cirrusColor = "#FF7722";
 	
 	/*
 	// Day
 	var sunBrightness = 1;
 	var lightColor = [255, 255, 255];
-	var hazeColor = "230, 240, 255";*/
+	var hazeColor = "230, 240, 255";
+	var cirrusColor = "#FFFFFF";
+	*/
 
 	var hazeIntensity = 1;
 
-	var cloudiness = 3;
-	var cloudHeight = 0;
+	var cloudiness = 2;
+	var cloudHeight = 50;
 
 	var layers = 6;
 	var layer = 0;
@@ -43,6 +47,7 @@ function buildLandscape(){
 	generateSkyGradient(preCanvas, preContext, {
 		 scale: scale
 		,intensity: 1
+		,cirrusColor: cirrusColor
 	});
 
 	generateHaze(preCanvas, preContext, {intensity: 0.8 * hazeIntensity, scale: scale, hazeColor: hazeColor});
@@ -195,7 +200,7 @@ function buildLandscape(){
 		generateHaze(preCanvas, preContext, {intensity: 0.1 * ((layers+1) / (layer+1)) * hazeIntensity, scale: scale, hazeColor: hazeColor});
 		var cloud = render8bit();
 		var left = 0;
-		setInterval(function(){cloud.style.left = left+"px"; left += 1/scale; }, 800 + 800 * Math.random());
+		//setInterval(function(){cloud.style.left = left+"px"; left += 1/scale; }, 800 + 800 * Math.random());
 	}
 
 

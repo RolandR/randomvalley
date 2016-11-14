@@ -2,7 +2,7 @@
 
 function generateSkyGradient(canvas, context, settings){
 
-	var {scale, intensity} = settings;
+	var {scale, intensity, cirrusColor} = settings;
 
 	var gradient = context.createLinearGradient(0, 0, 0, 2*canvas.height/3);
 	gradient.addColorStop(0, "#7699c1");
@@ -22,7 +22,7 @@ function generateSkyGradient(canvas, context, settings){
 		cirrusCanvas.height = canvas.height;
 		var cirrusContext = cirrusCanvas.getContext("2d");
 		
-		cirrusContext.fillStyle = "#FFFFFF";
+		cirrusContext.fillStyle = cirrusColor;
 		cirrusContext.fillRect(0, 0, cirrusCanvas.width, cirrusCanvas.height);
 
 		var image = cirrusContext.getImageData(0, 0, cirrusCanvas.width, cirrusCanvas.height);
@@ -38,9 +38,9 @@ function generateSkyGradient(canvas, context, settings){
 
 			var lightness = (noise.simplex2((x+dimX/10)/dimX, (y*(1+y/(200*scale))+dimY/10)/dimY)/2+0.5)*30+230;
 
-			image.data[i] = lightness;
-			image.data[i+1] = lightness;
-			image.data[i+2] = lightness;
+			image.data[i] *= 255/lightness;
+			image.data[i+1] *= 255/lightness;
+			image.data[i+2] *= 255/lightness;
 
 			var opacity = (noise.simplex2(x/dimX, (y*(1+y/(200*scale)))/dimY)/2+0.5);
 
