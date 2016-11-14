@@ -3,6 +3,8 @@ buildLandscape();
 
 function buildLandscape(){
 
+	noise.seed(Math.random());
+
 	var preCanvas = document.getElementById("prerenderCanvas");
 	var preContext = preCanvas.getContext("2d");
 
