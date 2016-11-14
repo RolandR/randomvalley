@@ -151,6 +151,11 @@ function buildLandscape(){
 
 	//return;
 
+	generateRain(preCanvas, preContext, {intensity: 1, scale: scale/2, farAway: true});
+	renderRain(0.05);
+
+	//return;
+
 	layer++;
 	generateTerrain(preCanvas, preContext, {
 		 haze: 0.5
@@ -167,6 +172,9 @@ function buildLandscape(){
 	render8bit();
 
 	addClouds(layer);
+
+	generateRain(preCanvas, preContext, {intensity: 1, scale: scale, farAway: true});
+	renderRain(0.08);
 
 	layer++;
 	generateTerrain(preCanvas, preContext, {
@@ -198,6 +206,17 @@ function buildLandscape(){
 	});
 	generateHaze(preCanvas, preContext, {intensity: 0.1 * hazeIntensity, scale: scale, hazeColor: hazeColor});
 	render8bit();
+
+	//return;
+
+	generateRain(preCanvas, preContext, {intensity: 1, scale: scale});
+	renderRain(1);
+
+	generateRain(preCanvas, preContext, {intensity: 1, scale: scale});
+	renderRain(1.2);
+
+	generateRain(preCanvas, preContext, {intensity: 1, scale: scale});
+	renderRain(1.5);
 
 	return;
 
@@ -283,14 +302,22 @@ function buildLandscape(){
 		
 	}
 
-	/*function renderTransparent8bit(){
+	function renderTransparent8bit(){
 		var image = preContext.getImageData(0, 0, preCanvas.width, preCanvas.height);
 
 		var colorResolution = 16;
 
+		var lightColorR = lightColor[0]/255;
+		var lightColorG = lightColor[1]/255;
+		var lightColorB = lightColor[2]/255;
+
 		for(var i = 0; i < image.data.length; i += 4){
 
 				var variance = (Math.random()-0.5)*10;
+
+				image.data[i  ] *= lightColorR;
+				image.data[i+1] *= lightColorG;
+				image.data[i+2] *= lightColorB;
 				
 				image.data[i  ] += variance;
 				image.data[i+1] += variance;
@@ -302,10 +329,77 @@ function buildLandscape(){
 				
 		};
 
+		var canvas = document.createElement("canvas");
+		canvas.height = height*scale;
+		canvas.width = width*scale;
+		document.getElementById("canvasDiv").appendChild(canvas);
+		var context = canvas.getContext("2d");
+
 		preContext.putImageData(image, 0, 0);
 		context.drawImage(preCanvas, 0, 0);
 
 		preContext.clearRect(0, 0, preCanvas.width, preCanvas.height);
-	}*/
+
+		return canvas;
+	}
+
+	function renderRain(speed){
+		var image = preContext.getImageData(0, 0, preCanvas.width, preCanvas.height);
+
+		var colorResolution = 16;
+
+		var lightColorR = lightColor[0]/255;
+		var lightColorG = lightColor[1]/255;
+		var lightColorB = lightColor[2]/255;
+
+		for(var i = 0; i < image.data.length; i += 4){
+
+				var variance = (Math.random()-0.5)*10;
+
+				image.data[i  ] *= lightColorR;
+				image.data[i+1] *= lightColorG;
+				image.data[i+2] *= lightColorB;
+				
+				image.data[i  ] += variance;
+				image.data[i+1] += variance;
+				image.data[i+2] += variance;
+				
+				image.data[i  ] = colorResolution * Math.round(image.data[i  ]/colorResolution);
+				image.data[i+1] = colorResolution * Math.round(image.data[i+1]/colorResolution);
+				image.data[i+2] = colorResolution * Math.round(image.data[i+2]/colorResolution);
+				
+		};
+
+		var canvas = document.createElement("canvas");
+		canvas.height = height*scale;
+		canvas.width = width*scale;
+		var context = canvas.getContext("2d");
+
+		preContext.putImageData(image, 0, 0);
+		context.drawImage(preCanvas, 0, 0);
+
+		var rainDiv = document.createElement("div");
+		rainDiv.className = "animateDiv";
+		rainDiv.style.background = "url("+canvas.toDataURL()+")";
+		rainDiv.style.backgroundSize = canvas.width / scale + "px " + canvas.height / scale + "px";
+		document.getElementById("canvasDiv").appendChild(rainDiv);
+
+		preContext.clearRect(0, 0, preCanvas.width, preCanvas.height);
+
+		var posX = 0;
+		var posY = 0;
+
+		var framerate = 60;
+
+		setInterval(function(){
+			posX += 2*speed * 60/framerate;
+			posY += 5*speed * 60/framerate;
+
+			rainDiv.style.backgroundPosition = ~~(posX)/scale + "px " + ~~(posY)/scale + "px";
+			
+		}, 1000/framerate);
+
+		return canvas;
+	}
 
 }
