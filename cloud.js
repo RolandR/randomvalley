@@ -44,7 +44,7 @@ function generateCloud(canvas, context, settings){
 			}
 		}
 
-		function smooth(radius){
+		/*function smooth(radius){
 			var newPoints = [];
 			for(var i = 0; i < points.length; i++){
 				var sumX = 0;
@@ -61,6 +61,35 @@ function generateCloud(canvas, context, settings){
 			}
 
 			points = newPoints;
+			
+		}*/
+
+		function smooth(radius){
+		
+			var averagingWidth = ~~(radius * 2);
+
+			if(averagingWidth > 0){
+
+				var newPoints = [];
+				
+				var sumX = 0;
+				var sumY = 0;
+
+				for(var i = points.length - averagingWidth; i < points.length; i++){
+					sumX += points[i][0];
+					sumY += points[i][1];
+				}
+				
+				for(var i = 0; i < points.length; i++){
+					sumX = sumX - points[(i - averagingWidth + points.length) % points.length][0] + points[i][0];
+					sumY = sumY - points[(i - averagingWidth + points.length) % points.length][1] + points[i][1];
+					newPoints[i] = [];
+					newPoints[i][0] = sumX / averagingWidth;
+					newPoints[i][1] = sumY / averagingWidth;
+				}
+
+				points = newPoints;
+			}
 			
 		}
 

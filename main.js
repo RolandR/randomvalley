@@ -18,20 +18,20 @@ function buildLandscape(){
 	var hazeColor = "100, 110, 120";
 	var cirrusColor = "#FFFFFF";*/
 
-	
+	/*
 	// Morning
 	var sunBrightness = 0.5;
 	var lightColor = [240, 200, 180];
 	var hazeColor = "255, 230, 200";
-	var cirrusColor = "#FF7722";
+	var cirrusColor = "#FF7722";*/
 	
-	/*
+	
 	// Day
 	var sunBrightness = 1;
 	var lightColor = [255, 255, 255];
 	var hazeColor = "230, 240, 255";
 	var cirrusColor = "#FFFFFF";
-	*/
+	
 
 	var hazeIntensity = 1;
 
@@ -73,6 +73,9 @@ function buildLandscape(){
 		,snowness: 0.6
 		,hillshadeIntensity: 5 * sunBrightness
 	});
+
+	//render8bit();
+	//return;
 	
 
 	generateHaze(preCanvas, preContext, {intensity: 1.2 * hazeIntensity, scale: scale, hazeColor: hazeColor});
@@ -126,7 +129,7 @@ function buildLandscape(){
 	generateTerrain(preCanvas, preContext, {
 		 haze: 0.5
 		,terrainPoints: [preCanvas.height/2, 2*preCanvas.height/3, preCanvas.height/2]
-		,smoothness: 100
+		,smoothness: 25
 		,c0: [115, 121, 80]
 		,ruggedness: 0.5
 		,scale: scale
@@ -143,7 +146,7 @@ function buildLandscape(){
 	generateTerrain(preCanvas, preContext, {
 		 haze: 0.25
 		,terrainPoints: [2*preCanvas.height/3, 4*preCanvas.height/5, 2*preCanvas.height/3]
-		,smoothness: 250
+		,smoothness: 100
 		,c0: [120, 140, 60]
 		,ruggedness: 0.4
 		,scale: scale

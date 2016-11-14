@@ -37,23 +37,27 @@ function generateTerrain(canvas, context, settings){
 	}
 
 	function smooth(radius){
-		var newTerrainPoints = [];
-		for(var i = 0; i < terrainPoints.length; i++){
+		
+		var averagingWidth = ~~(radius * 2);
+
+		if(averagingWidth > 0){
+
+			var newTerrainPoints = [];
+			
 			var sum = 0;
-			for(var a = 0-radius; a <= radius; a++){
-				if(typeof terrainPoints[i+a] == "undefined"){
-					sum += terrainPoints[i];
-				} else {
-					sum += terrainPoints[i+a];
-				}
+
+			for(var i = terrainPoints.length - averagingWidth; i < terrainPoints.length; i++){
+				sum += terrainPoints[i];
+			}
+			
+			for(var i = 0; i < terrainPoints.length; i++){
+				sum = sum - terrainPoints[(i - averagingWidth + terrainPoints.length) % terrainPoints.length] + terrainPoints[i];
+				newTerrainPoints[i] = sum / averagingWidth;
 			}
 
-			newTerrainPoints[i] = sum / (radius*2+1);
+			terrainPoints = newTerrainPoints;
 		}
-
-		terrainPoints = newTerrainPoints;
-
-		//console.log(terrainPoints.length, newTerrainPoints.length);
+		
 	}
 
 	/*function erode(value, iterations){
@@ -175,22 +179,34 @@ function generateTerrain(canvas, context, settings){
 
 		// Smoothen it out
 		
-		var smoothHeightmap = new Float32Array(canvas.width * canvas.height);
-		for(var i = 0; i < heightmap.length; i++){
+		var radius = ~~(smoothness/8);
+		var averagingWidth = 2*radius+1;
+
+		if(averagingWidth > 0){
+
+			var smoothHeightmap = new Float32Array(canvas.width * canvas.height);
 			var sum = 0;
-			var radius = ~~(smoothness/8);
-			for(var a = 0-radius; a <= radius; a++){
-				if(typeof heightmap[i+a] == "undefined"/* || heightmap[i+a] == 0*/){
-					sum += heightmap[i];
-				} else {
-					sum += heightmap[i+a];
+			
+			for(var y = 0; y < canvas.height; y++){
+
+				sum = 0;
+				var h = y * canvas.width;
+
+				for(var x = 0 - radius; x <= radius; x++){
+					sum += heightmap[h + (x + canvas.width) % canvas.width];
 				}
+
+				for(var x = 0; x < canvas.width; x++){
+					
+					sum = sum - heightmap[h + (x - radius + canvas.width) % canvas.width]
+							  + heightmap[h + (x + radius + 1 + canvas.width) % canvas.width];
+					smoothHeightmap[h+x] = sum / averagingWidth;
+				}
+				
 			}
 
-			smoothHeightmap[i] = sum / (radius*2+1);
+			heightmap.set(smoothHeightmap);
 		}
-
-		heightmap.set(smoothHeightmap);
 
 		generateHillshade(heightmap);
 	}
@@ -199,64 +215,77 @@ function generateTerrain(canvas, context, settings){
 
 		var hillshadeImage = context.getImageData(0, 0, canvas.width, canvas.height);
 
-		for(var i = 0; i < heightmap.length; i++){
+		var radius = ~~(2/scale);
+		var averagingWidth = 2*radius+1;
 
-			if(heightmap[i] != 0){
-				var x = i % canvas.width;
-				var y = ~~(i / canvas.width);
+		console.log(radius);
+		console.log(averagingWidth);
 
-				var sum = 0;
-				var radius = 2/scale;
-				for(var a = 0-radius; a <= radius; a++){
-					if(typeof heightmap[i+a] == "undefined"/* || heightmap[i+a] == 0*/){
-						sum += heightmap[i];
-					} else {
-						sum += heightmap[i+a];
-					}
-				}
-				var average = sum / (radius*2+1);
-				if(snow){
-					if(heightmap[i] < average*(1+snowness/100)){
-						hillshadeImage.data[i*4  ] = 200;
-						hillshadeImage.data[i*4+1] = 200;
-						hillshadeImage.data[i*4+2] = 210;
-					}
-				} else {
-					var n = noise.simplex2(x/(20*scale), y/(10*scale)) * 0.7;
-					n = n * scale;
-					
-					if(heightmap[i] + n < average*(1+snowness/(100))){
-						hillshadeImage.data[i*4  ] = 140 + n*50;
-						hillshadeImage.data[i*4+1] = 140 + n*50;
-						hillshadeImage.data[i*4+2] = 130 + n*50;
-					}
-				}
+		for(var y = 0; y < canvas.height; y++){
 
-				var grade = 0;
-				if(x != 0){
-					grade = heightmap[i] - heightmap[i-1];
-				}
-				
-				grade = grade * (hillshadeIntensity/(scale+1));
+			var sum = 0;
+			var h = y * canvas.width;
 
-				grade = (grade+5) * 30;
-
-				grade = Math.min(255, grade);
-				grade = Math.max(-255, grade);
-
-				grade = 2*grade / 255 - 1;
-
-				hillshadeImage.data[i*4  ] *= 1+grade;
-				hillshadeImage.data[i*4+1] *= 1+grade;
-				hillshadeImage.data[i*4+2] *= 1+grade;
-				
-			} else {
-				hillshadeImage.data[i*4+3] = 0;
+			for(var x = 0 - radius; x <= radius; x++){
+				sum += heightmap[h + (x + canvas.width) % canvas.width];
 			}
 
-			/*hillshadeImage.data[i*4  ] = heightmap[i];
-			hillshadeImage.data[i*4+1] = heightmap[i];
-			hillshadeImage.data[i*4+2] = heightmap[i];*/
+			for(var x = 0; x < canvas.width; x++){
+
+				var i = h+x;
+
+				var average = 0;
+
+				if(averagingWidth > 0){
+					average = sum / averagingWidth;
+					sum = sum - heightmap[h + (x - radius + canvas.width) % canvas.width]
+							  + heightmap[h + (x + radius + 1 + canvas.width) % canvas.width];
+				} else {
+					average = heightmap[i];
+				}
+			
+				if(heightmap[h+x] != 0){
+					
+					if(snow){
+						if(heightmap[i] < average*(1+snowness/100)){
+							hillshadeImage.data[i*4  ] = 200;
+							hillshadeImage.data[i*4+1] = 200;
+							hillshadeImage.data[i*4+2] = 210;
+						}
+					} else {
+						var n = noise.simplex2(x/(20*scale), y/(10*scale)) * 0.7;
+						n = n * scale;
+						
+						if(heightmap[i] + n < average*(1+snowness/(100))){
+							hillshadeImage.data[i*4  ] = 140 + n*50;
+							hillshadeImage.data[i*4+1] = 140 + n*50;
+							hillshadeImage.data[i*4+2] = 130 + n*50;
+						}
+					}
+
+					var grade = 0;
+					if(x != 0){
+						grade = heightmap[i] - heightmap[h+(x-1+canvas.width)%canvas.width];
+					}
+					
+					grade = grade * (hillshadeIntensity/(scale+1));
+
+					grade = (grade+5) * 30;
+
+					grade = Math.min(255, grade);
+					grade = Math.max(-255, grade);
+
+					grade = 2*grade / 255 - 1;
+
+					hillshadeImage.data[i*4  ] *= 1+grade;
+					hillshadeImage.data[i*4+1] *= 1+grade;
+					hillshadeImage.data[i*4+2] *= 1+grade;
+					
+				} else {
+					hillshadeImage.data[i*4+3] = 0;
+				}
+
+			}
 		}
 
 		context.putImageData(hillshadeImage, 0, 0);
