@@ -264,6 +264,16 @@ function generateTerrain(canvas, context, settings){
 					if(x != 0){
 						grade = heightmap[i] - heightmap[h+(x-1+canvas.width)%canvas.width];
 					}
+
+					/*if(grade > 0){
+						hillshadeImage.data[i*4  ] += 5;
+						hillshadeImage.data[i*4+1] += 5;
+						hillshadeImage.data[i*4+2] += 5;
+					} else {
+						hillshadeImage.data[i*4  ] -= 5;
+						hillshadeImage.data[i*4+1] -= 5;
+						hillshadeImage.data[i*4+2] -= 5;
+					}*/
 					
 					grade = grade * (hillshadeIntensity/(scale+1));
 

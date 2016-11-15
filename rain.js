@@ -14,8 +14,8 @@ function generateRain(canvas, context, settings){
 
 	for(var i = 0; i < count; i++){
 
-		var posX = Math.random() * canvas.width;
-		var posY = Math.random() * canvas.height;
+		var posX = ~~(Math.random() * canvas.width)+0.5;
+		var posY = ~~(Math.random() * canvas.height)+0.5;
 		context.moveTo(posX, posY);
 		context.lineTo(posX + 2, posY + 5);
 		context.stroke();

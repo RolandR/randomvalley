@@ -37,6 +37,8 @@ function buildLandscape(){
 	var lightColor;
 	var hazeColor;
 	var cirrusColor;
+	var skyBrightness;
+	var cirrusDensity;
 
 	if(randTime < daytimeProbabilites[0]){
 		//Night
@@ -44,18 +46,24 @@ function buildLandscape(){
 		lightColor = [120, 130, 140];
 		hazeColor = "100, 110, 120";
 		cirrusColor = "#FFFFFF";
+		skyBrightness = 0.5;
+		cirrusDensity = 1;
 	} else if(randTime < daytimeProbabilites[1]){
 		// Morning
 		sunBrightness = 0.5;
 		lightColor = [240, 200, 180];
 		hazeColor = "255, 230, 200";
-		cirrusColor = "#FF7722";
+		cirrusColor = "#FF9977";
+		skyBrightness = 0.8;
+		cirrusDensity = 1;
 	} else {
 		// Day
 		sunBrightness = 1;
 		lightColor = [255, 255, 255];
-		hazeColor = "230, 240, 255";
+		hazeColor = "220, 230, 255";
 		cirrusColor = "#FFFFFF";
+		skyBrightness = 1;
+		cirrusDensity = 1;
 	}
 	
 
@@ -64,20 +72,61 @@ function buildLandscape(){
 	var cloudiness = 2;
 	var cloudHeight = 50;
 
+	var skyHazeColor = hazeColor;
+
+	/*sunBrightness = 0.5;
+	lightColor = [200, 200, 210];
+	hazeColor = "180, 190, 200";
+	cirrusColor = "#FFFFFF";
+	hazeIntensity = 1.8;
+	cloudiness = 10;
+	cloudHeight = 0;*/
+
+	sunBrightness = 0.5;
+	lightColor = [100, 120, 180];
+	hazeColor = "100, 120, 180";
+	skyHazeColor = "100, 110, 100";
+	cirrusColor = "#FFFFFF";
+	hazeIntensity = 0.2;
+	cloudiness = 0;
+	cloudHeight = 0;
+
+	var skyBrightness = 0.3;
+	var cirrusDensity = 0.3;
+
 	var layers = 6;
 	var layer = 0;
+
+	var heightSpan = 0.3;
+	var ruggednessSpan = 0.8;
 
 	preCanvas.width = width*scale;
 	preCanvas.height = height*scale;
 
 	generateSkyGradient(preCanvas, preContext, {
-		 scale: scale
-		,intensity: 1
+		scale: scale
+		,skyBrightness: skyBrightness
+	});
+
+	generateStars(preCanvas, preContext, {intensity: 1, scale: scale});
+	
+	generateAurora(preCanvas, preContext, {intensity: 1, scale: scale});
+
+	render8bit(true);
+
+	generateCirrus(preCanvas, preContext, {
+		scale: scale
+		,cirrusDensity: cirrusDensity
 		,cirrusColor: cirrusColor
 	});
 
-	generateHaze(preCanvas, preContext, {intensity: 0.8 * hazeIntensity, scale: scale, hazeColor: hazeColor});
-	render8bit();
+	generateHaze(preCanvas, preContext, {
+		intensity: 5.8 * hazeIntensity
+		,scale: scale
+		,hazeColor: skyHazeColor
+		,hazeStart: 0
+	});
+	renderTransparent8bit();
 	
 	addClouds(layer);
 
@@ -90,10 +139,14 @@ function buildLandscape(){
 
 	generateTerrain(preCanvas, preContext, {
 		 haze: 0.7
-		,terrainPoints: [preCanvas.height/4 - Math.random()*30, Math.random() * preCanvas.height/4 + preCanvas.height/4, preCanvas.height/4 - Math.random()*30]
+		,terrainPoints: [
+			 preCanvas.height - ((layers-layer+1)/(layers+1))*heightSpan*preCanvas.height
+			,preCanvas.height - ((layers-layer+1)/(layers+1))*heightSpan*preCanvas.height
+			,preCanvas.height - ((layers-layer+1)/(layers+1))*heightSpan*preCanvas.height
+		]
 		,smoothness: 0
 		,c0: [100, 100, 100]
-		,ruggedness: 0.5
+		,ruggedness: 0.5 * ruggednessSpan
 		,scale: scale*2
 		,snow: true
 		,snowness: 0.6
@@ -104,7 +157,7 @@ function buildLandscape(){
 	//return;
 	
 
-	generateHaze(preCanvas, preContext, {intensity: 1.2 * hazeIntensity, scale: scale, hazeColor: hazeColor});
+	addHaze(layer);
 	render8bit();
 
 	addClouds(layer);
@@ -113,10 +166,14 @@ function buildLandscape(){
 
 	generateTerrain(preCanvas, preContext, {
 		 haze: 0.7
-		,terrainPoints: [preCanvas.height/4, Math.random() * preCanvas.height/4 + preCanvas.height/4, preCanvas.height/4]
+		,terrainPoints: [
+			 preCanvas.height - ((layers-layer+1)/(layers+1))*heightSpan*preCanvas.height
+			,preCanvas.height - ((layers-layer+1)/(layers+1))*heightSpan*preCanvas.height
+			,preCanvas.height - ((layers-layer+1)/(layers+1))*heightSpan*preCanvas.height
+		]
 		,smoothness: 0
 		,c0: [100, 100, 100]
-		,ruggedness: 0.5
+		,ruggedness: 0.5 * ruggednessSpan
 		,scale: scale*1.5
 		,snow: true
 		,snowness: 0.2
@@ -124,7 +181,8 @@ function buildLandscape(){
 	});
 	
 
-	generateHaze(preCanvas, preContext, {intensity: 0.8 * hazeIntensity, scale: scale, hazeColor: hazeColor});
+	addHaze(layer);
+	
 	render8bit();
 
 	addClouds(layer);
@@ -133,10 +191,14 @@ function buildLandscape(){
 	layer++;
 	generateTerrain(preCanvas, preContext, {
 		 haze: 0.7
-		,terrainPoints: [preCanvas.height/4 + Math.random()*50, Math.random() * preCanvas.height/4 + preCanvas.height/4, preCanvas.height/4 + Math.random()*50]
+		,terrainPoints: [
+			 preCanvas.height - ((layers-layer+1)/(layers+1))*heightSpan*preCanvas.height
+			,preCanvas.height - ((layers-layer+1)/(layers+1))*heightSpan*preCanvas.height
+			,preCanvas.height - ((layers-layer+1)/(layers+1))*heightSpan*preCanvas.height
+		]
 		,smoothness: 0
 		,c0: [100, 100, 100]
-		,ruggedness: 0.5
+		,ruggedness: 0.5 * ruggednessSpan
 		,scale: scale
 		,snow: true
 		,snowness: 0.1
@@ -144,51 +206,59 @@ function buildLandscape(){
 	});
 	
 
-	generateHaze(preCanvas, preContext, {intensity: 0.4 * hazeIntensity, scale: scale, hazeColor: hazeColor});
+	addHaze(layer);
 	render8bit();
 
 	addClouds(layer);
 
 	//return;
 
-	generateRain(preCanvas, preContext, {intensity: 1, scale: scale/2, farAway: true});
-	renderRain(0.05);
+	/*generateRain(preCanvas, preContext, {intensity: 1, scale: scale/2, farAway: true});
+	renderRain(0.05);*/
 
 	//return;
 
 	layer++;
 	generateTerrain(preCanvas, preContext, {
 		 haze: 0.5
-		,terrainPoints: [preCanvas.height/2, 2*preCanvas.height/3, preCanvas.height/2]
+		,terrainPoints: [
+			 preCanvas.height - ((layers-layer+1)/(layers+1))*heightSpan*preCanvas.height
+			,preCanvas.height - ((layers-layer+1)/(layers+1))*heightSpan*preCanvas.height
+			,preCanvas.height - ((layers-layer+1)/(layers+1))*heightSpan*preCanvas.height
+		]
 		,smoothness: 25
 		,c0: [115, 121, 80]
-		,ruggedness: 0.5
+		,ruggedness: 0.3 * ruggednessSpan
 		,scale: scale
 		,snow: false
 		,snowness: -0.2
 		,hillshadeIntensity: 1 * sunBrightness
 	});
-	generateHaze(preCanvas, preContext, {intensity: 0.2 * hazeIntensity, scale: scale, hazeColor: hazeColor});
+	addHaze(layer);
 	render8bit();
 
 	addClouds(layer);
 
-	generateRain(preCanvas, preContext, {intensity: 1, scale: scale, farAway: true});
-	renderRain(0.08);
+	/*generateRain(preCanvas, preContext, {intensity: 1, scale: scale, farAway: true});
+	renderRain(0.08);*/
 
 	layer++;
 	generateTerrain(preCanvas, preContext, {
 		 haze: 0.25
-		,terrainPoints: [2*preCanvas.height/3, 4*preCanvas.height/5, 2*preCanvas.height/3]
+		,terrainPoints: [
+			 preCanvas.height - ((layers-layer+1)/(layers+1))*heightSpan*preCanvas.height
+			,preCanvas.height - ((layers-layer+1)/(layers+1))*heightSpan*preCanvas.height
+			,preCanvas.height - ((layers-layer+1)/(layers+1))*heightSpan*preCanvas.height
+		]
 		,smoothness: 100
 		,c0: [120, 140, 60]
-		,ruggedness: 0.4
+		,ruggedness: 0.2 * ruggednessSpan
 		,scale: scale
 		,snow: false
 		,snowness: -0.7
 		,hillshadeIntensity: 1 * sunBrightness
 	});
-	generateHaze(preCanvas, preContext, {intensity: 0.2 * hazeIntensity, scale: scale, hazeColor: hazeColor});
+	addHaze(layer);
 	render8bit();
 
 	addClouds(layer);
@@ -196,27 +266,31 @@ function buildLandscape(){
 	layer++;
 	var terrain = generateTerrain(preCanvas, preContext, {
 		 haze: 0
-		,terrainPoints: [4*preCanvas.height/5, 5*preCanvas.height/6, 4*preCanvas.height/5]
+		,terrainPoints: [
+			 preCanvas.height - ((layers-layer+1)/(layers+1))*heightSpan*preCanvas.height
+			,preCanvas.height - ((layers-layer+1)/(layers+1))*heightSpan*preCanvas.height
+			,preCanvas.height - ((layers-layer+1)/(layers+1))*heightSpan*preCanvas.height
+		]
 		,smoothness: 300
 		,c0: [126, 154, 70]
-		,ruggedness: 0.3
+		,ruggedness: 0.1 * ruggednessSpan
 		,scale: scale
 		,snow: false
 		,hillshadeIntensity: 1 * sunBrightness
 	});
-	generateHaze(preCanvas, preContext, {intensity: 0.1 * hazeIntensity, scale: scale, hazeColor: hazeColor});
+	addHaze(layer);
 	render8bit();
 
 	//return;
 
-	generateRain(preCanvas, preContext, {intensity: 1, scale: scale});
+	/*generateRain(preCanvas, preContext, {intensity: 1, scale: scale});
 	renderRain(1);
 
 	generateRain(preCanvas, preContext, {intensity: 1, scale: scale});
 	renderRain(1.2);
 
 	generateRain(preCanvas, preContext, {intensity: 1, scale: scale});
-	renderRain(1.5);
+	renderRain(1.5);*/
 
 	return;
 
@@ -245,14 +319,23 @@ function buildLandscape(){
 				,initialRadius: 60*scale
 			});
 		}
-		generateHaze(preCanvas, preContext, {intensity: 0.1 * ((layers+1) / (layer+1)) * hazeIntensity, scale: scale, hazeColor: hazeColor});
+		generateHaze(preCanvas, preContext, {intensity: 0.1 * ((layers+1) / (layer+1)) * hazeIntensity, scale: scale, hazeColor: hazeColor, hazeStart: -1});
 		var cloud = render8bit();
 		var left = 0;
 		//setInterval(function(){cloud.style.left = left+"px"; left += 1/scale; }, 800 + 800 * Math.random());
 	}
 
+	function addHaze(layer){
+		generateHaze(preCanvas, preContext, {
+			intensity: ((layers-layer+1)/(layers+1)) * hazeIntensity
+			,scale: scale
+			,hazeColor: hazeColor
+			,hazeStart: 1 - ((layers-layer+1)/(layers+1))*(heightSpan+ruggednessSpan/3)*2
+		});
+	}
 
-	function render8bit(){
+
+	function render8bit(ignoreLightColor){
 		
 		var image = preContext.getImageData(0, 0, preCanvas.width, preCanvas.height);
 
@@ -266,11 +349,13 @@ function buildLandscape(){
 
 			if(image.data[i+3] > 220){
 
-				var variance = (Math.random()-0.5)*10;
+				if(!ignoreLightColor){
+					image.data[i  ] *= lightColorR;
+					image.data[i+1] *= lightColorG;
+					image.data[i+2] *= lightColorB;
+				}
 
-				image.data[i  ] *= lightColorR;
-				image.data[i+1] *= lightColorG;
-				image.data[i+2] *= lightColorB;
+				var variance = (Math.random()-0.5)*10;
 				
 				image.data[i  ] += variance;
 				image.data[i+1] += variance;
@@ -322,10 +407,14 @@ function buildLandscape(){
 				image.data[i  ] += variance;
 				image.data[i+1] += variance;
 				image.data[i+2] += variance;
+				if(image.data[i+3] > 0){
+					image.data[i+3] += variance;
+				}
 				
 				image.data[i  ] = colorResolution * Math.round(image.data[i  ]/colorResolution);
 				image.data[i+1] = colorResolution * Math.round(image.data[i+1]/colorResolution);
 				image.data[i+2] = colorResolution * Math.round(image.data[i+2]/colorResolution);
+				image.data[i+3] = colorResolution * Math.round(image.data[i+3]/colorResolution);
 				
 		};
 
