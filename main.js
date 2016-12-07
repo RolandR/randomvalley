@@ -111,6 +111,8 @@ function buildLandscape(){
 	generateStars(preCanvas, preContext, {intensity: 1, scale: scale});
 	
 	generateAurora(preCanvas, preContext, {intensity: 1, scale: scale});
+	
+	//generateLightning(preCanvas, preContext, {intensity: 1, scale: scale});
 
 	render8bit(true);
 
