@@ -2,7 +2,7 @@
 
 function generateCloud(canvas, context, settings){
 
-	var {cx, cy, count, initialRadius} = settings;
+	var {cx, cy, count, initialRadius, resolution} = settings;
 
 	for(var i = 0; i < count; i++){
 		generateCloudPart(
@@ -16,12 +16,12 @@ function generateCloud(canvas, context, settings){
 
 		var points = [];
 
-		var pointCount = 100;
+		var pointCount = resolution;
 
 		populateCircle();
 
 		pushOutwards();
-		smooth(17);
+		smooth(17 * (resolution/100));
 		render();
 
 		function populateCircle(){

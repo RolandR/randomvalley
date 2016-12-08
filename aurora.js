@@ -4,12 +4,12 @@ function generateAurora(canvas, context, settings){
 
 	var {scale, intensity} = settings;
 
-	intensity = 0.5
+	intensity = 0.3;
 
 	var lineLength = 30;
 
-	var z = 0.5;
-	var x = 0;
+	var z = Math.random();
+	var x = Math.random() - 0.5;
 	var y = 0.3;
 
 	var xSpeed = 0;
