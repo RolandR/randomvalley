@@ -535,7 +535,7 @@ function buildLandscape(){
 
 	function render8bit(layer, ignoreLightColor, type, settings){
 		
-		var image = preContext.getImageData(0, 0, preCanvas.width, preCanvas.height);
+		//var image = preContext.getImageData(0, 0, preCanvas.width, preCanvas.height);
 
 		/*
 		var colorResolution = 16;
@@ -573,23 +573,23 @@ function buildLandscape(){
 		*/
 		
 
-		var canvas = document.createElement("canvas");
+		/*var canvas = document.createElement("canvas");
 		canvas.height = height*scale;
 		canvas.width = width*scale;
 		var context = canvas.getContext("2d");
 
 		preContext.putImageData(image, 0, 0);
-		context.drawImage(preCanvas, 0, 0);
-
-		preContext.clearRect(0, 0, preCanvas.width, preCanvas.height);
+		context.drawImage(preCanvas, 0, 0);*/
 
 		if(!settings){
 			settings = {};
 		}
 		settings.scale = scale;
-		renderer.addLayer(canvas, layer, type, settings);
+		renderer.addLayer(preCanvas, layer, type, settings);
 
-		return canvas;
+		preContext.clearRect(0, 0, preCanvas.width, preCanvas.height);
+
+		//return canvas;
 		
 	}
 
@@ -640,47 +640,21 @@ function buildLandscape(){
 	}*/
 
 	function renderRain(layer, speed){
-		var image = preContext.getImageData(0, 0, preCanvas.width, preCanvas.height);
+		//var image = preContext.getImageData(0, 0, preCanvas.width, preCanvas.height);
 
-		var colorResolution = 16;
-
-		var lightColorR = lightColor[0]/255;
-		var lightColorG = lightColor[1]/255;
-		var lightColorB = lightColor[2]/255;
-
-		for(var i = 0; i < image.data.length; i += 4){
-
-				var variance = (Math.random()-0.5)*10;
-
-				image.data[i  ] *= lightColorR;
-				image.data[i+1] *= lightColorG;
-				image.data[i+2] *= lightColorB;
-				
-				image.data[i  ] += variance;
-				image.data[i+1] += variance;
-				image.data[i+2] += variance;
-				
-				image.data[i  ] = colorResolution * Math.round(image.data[i  ]/colorResolution);
-				image.data[i+1] = colorResolution * Math.round(image.data[i+1]/colorResolution);
-				image.data[i+2] = colorResolution * Math.round(image.data[i+2]/colorResolution);
-
-				image.data[i+3] = image.data[i+3]/2;
-				
-		};
-
-		var canvas = document.createElement("canvas");
+		/*var canvas = document.createElement("canvas");
 		canvas.height = height*scale;
 		canvas.width = width*scale;
 		var context = canvas.getContext("2d");
 
 		preContext.putImageData(image, 0, 0);
-		context.drawImage(preCanvas, 0, 0);
+		context.drawImage(preCanvas, 0, 0);*/
+
+		renderer.addLayer(preCanvas, layer, "rain", {rainSpeed: speed});
 
 		preContext.clearRect(0, 0, preCanvas.width, preCanvas.height);
 
-		renderer.addLayer(canvas, layer, "rain", {rainSpeed: speed});
-
-		return canvas;
+		//return canvas;
 	}
 
 }

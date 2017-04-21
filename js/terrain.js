@@ -295,8 +295,8 @@ function generateTerrain(canvas, context, settings){
 		var paddedHeightmap = new Float32Array(heightmap.length * 3);
 		for (var i = 0; i < heightmap.length; i++) {
 			paddedHeightmap[i*3  ] = heightmap[i];
-			paddedHeightmap[i*3+1] = heightmap[i];
-			paddedHeightmap[i*3+2] = heightmap[i];
+			//paddedHeightmap[i*3+1] = heightmap[i];
+			//paddedHeightmap[i*3+2] = heightmap[i];
 		}
 		return paddedHeightmap;
 	}
