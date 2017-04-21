@@ -20,6 +20,7 @@
 			#canvasDiv{
 				height: 100%;
 				background-color: #333333;
+				display: none;
 			}
 			canvas, .animateDiv{
 				height: 100%;
@@ -34,6 +35,10 @@
 		</style>
 	</head>
 	<body>
+		<canvas id="glCanvas">
+			Needs more canvas
+		</canvas>
+		
 		<div id="canvasDiv">
 
 		</div>
@@ -41,19 +46,23 @@
 			Needs more canvas
 		</canvas>
 	</body>
-	<script type="text/javascript" src="./perlin.js"></script>
-	
-	<script type="text/javascript" src="./terrain.js"></script>
-	<script type="text/javascript" src="./evergreen.js"></script>
-	<script type="text/javascript" src="./skygradient.js"></script>
-	<script type="text/javascript" src="./cloud.js"></script>
-	<script type="text/javascript" src="./house.js"></script>
-	<script type="text/javascript" src="./haze.js"></script>
-	<script type="text/javascript" src="./rain.js"></script>
-	<script type="text/javascript" src="./aurora.js"></script>
-	<script type="text/javascript" src="./cirrus.js"></script>
-	<script type="text/javascript" src="./stars.js"></script>
-	<script type="text/javascript" src="./lightning.js"></script>
+	<script type="text/javascript" src="./js/perlin.js"></script>
 
-	<script type="text/javascript" src="./main.js"></script>
+	<script type="text/javascript" src="./js/webgl/vertexshader.js"></script>
+	<script type="text/javascript" src="./js/webgl/fragmentshader.js"></script>
+	<script type="text/javascript" src="./js/webgl/renderer.js"></script>
+	
+	<script type="text/javascript" src="./js/terrain.js"></script>
+	<script type="text/javascript" src="./js/evergreen.js"></script>
+	<script type="text/javascript" src="./js/skygradient.js"></script>
+	<script type="text/javascript" src="./js/cloud.js"></script>
+	<script type="text/javascript" src="./js/house.js"></script>
+	<script type="text/javascript" src="./js/haze.js"></script>
+	<script type="text/javascript" src="./js/rain.js"></script>
+	<script type="text/javascript" src="./js/aurora.js"></script>
+	<script type="text/javascript" src="./js/cirrus.js"></script>
+	<script type="text/javascript" src="./js/stars.js"></script>
+	<script type="text/javascript" src="./js/lightning.js"></script>
+
+	<script type="text/javascript" src="./js/main.js"></script>
 </html>

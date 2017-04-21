@@ -9,7 +9,7 @@ function generateRain(canvas, context, settings){
 	var count = 1000 * intensity * scale * scale;
 
 	context.beginPath();
-	context.strokeStyle = "rgba(180, 180, 180, 0.8)";
+	context.strokeStyle = "rgba(180, 180, 180, 0.1)";
 	context.lineWidth = 0.5;
 
 	for(var i = 0; i < count; i++){
@@ -17,7 +17,7 @@ function generateRain(canvas, context, settings){
 		var posX = ~~(Math.random() * canvas.width)+0.5;
 		var posY = ~~(Math.random() * canvas.height)+0.5;
 		context.moveTo(posX, posY);
-		context.lineTo(posX + 2, posY + 5);
+		context.lineTo(posX + 1, posY + 2.5);
 		context.stroke();
 	}
 
