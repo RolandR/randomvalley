@@ -150,7 +150,7 @@ function Renderer(canvasId){
 		[12, 0.9 , 0.9 , 0.9 ],
 		[15, 0.8 , 0.8 , 0.9 ],
 		[18, 1.0 , 0.8 , 0.6 ],
-		[20, 1.0 , 0.6 , 0.3 ],
+		[19.5, 1.0 , 0.6 , 0.3 ],
 		[21, 0.4 , 0.3 , 0.2 ],
 		[24, 0.07, 0.07, 0.07],
 	];
@@ -290,7 +290,7 @@ function Renderer(canvasId){
 				gl.uniform2f(offsetAttr, offsetX, 0);
 			}
 
-			if(layers[i].type == "haze"){
+			if(layers[i].type == "haze" || layers[i].type == "rain"){
 				gl.uniform1i(preserveAlphaAttr, true);
 			} else {
 				gl.uniform1i(preserveAlphaAttr, false);

@@ -139,6 +139,16 @@ function buildLandscape(){
 		
 	}
 
+	var weatherProbabilities = [
+		 1 // Clear
+		,1 // Beautiful day
+		,1 // Cloudy
+		,1 // Heavy Cirrus
+		,1 // Fog
+		,1 // Light Rain
+		,1 // Heavy Rain
+	]
+
 	var weatherProbabilitiesSum = 0;
 	for(var i in weatherProbabilities){
 		weatherProbabilitiesSum += weatherProbabilities[i];
@@ -152,7 +162,7 @@ function buildLandscape(){
 	}
 
 	var randWeather = Math.random();
-	randWeather = 0;
+	//randWeather = 0;
 
 	//var sunBrightness;
 	var cirrusDensity;
@@ -235,7 +245,7 @@ function buildLandscape(){
 		windSpeed = 0 - windSpeed;
 	}
 
-	var hazeIntensity = 0.2;
+	//var hazeIntensity = 0.5;
 
 	/*sunBrightness = 0.5;
 	lightColor = [200, 200, 210];
