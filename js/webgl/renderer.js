@@ -142,14 +142,68 @@ function Renderer(canvasId){
 	var settings = {};
 	var sunPosition = [0, 0];
 
+	var sunLightColors = [
+		[0 , 0.07, 0.07, 0.07],
+		[3 , 0.15, 0.1 , 0.15],
+		[6 , 0.7 , 0.5 , 0.2 ],
+		[9 , 0.9 , 0.9 , 0.8 ],
+		[12, 0.9 , 0.9 , 0.9 ],
+		[15, 0.8 , 0.8 , 0.9 ],
+		[18, 1.0 , 0.8 , 0.6 ],
+		[20, 1.0 , 0.6 , 0.3 ],
+		[21, 0.4 , 0.3 , 0.2 ],
+		[24, 0.07, 0.07, 0.07],
+	];
+
+	var ambientLightColors = [
+		[0 , 0.1 , 0.2 , 0.25],
+		[6 , 0.3 , 0.2 , 0.1 ],
+		[12, 0.3 , 0.4 , 0.5 ],
+		[18, 0.3 , 0.2 , 0.1 ],
+		[24, 0.1 , 0.2 , 0.25],
+	];
+
+	var ambientLightColors = [
+		[0 , 0.1   , 0.1 , 0.2 ],
+		[24, 0.1   , 0.1 , 0.2 ],
+	];
+
+	function getColorByTime(time, colors){
+		for(var i = 0; i < colors.length; i++){
+			if(!colors[i+1]){
+				return [colors[i][1], colors[i][2], colors[i][3]];
+			} else if(time <= colors[i+1][0]){
+				var span = colors[i+1][0]-colors[i][0];
+				var relative = (time - colors[i][0])/span;
+				return([
+					colors[i][1]*(1-relative) + colors[i+1][1]*(relative),
+					colors[i][2]*(1-relative) + colors[i+1][2]*(relative),
+					colors[i][3]*(1-relative) + colors[i+1][3]*(relative)
+				]);
+			}
+		}
+	}
+
 	function render(){
 
 		var now = Date.now();
 		var diff = now - lastTime;
 		lastTime = now;
 		
-		var nanoTime = window.performance.now();
-		sunPosition = [Math.sin(nanoTime/1000), Math.cos(nanoTime/1000)];
+		var nanoTime = window.performance.now()/4000;
+		sunPosition = [Math.sin(nanoTime), Math.cos(nanoTime)];
+		
+		var time = ((nanoTime)/(Math.PI*2))%1;
+		time = time * 24;
+
+		var sunLight = getColorByTime(time, sunLightColors);
+		//console.log(time, sunLight);
+		//var sunLight = [1, 1, 1];
+		var ambientLight = getColorByTime(time, ambientLightColors);
+		
+		//var hour = (time - time%1) + "";
+		//var minute = Math.floor((time%1)*60) + "";
+		//console.log(("0"+hour).slice(-2) + ":" + ("0"+minute).slice(-2));
 		
 		rainOffset[0] -= (diff/(2))*settings.windSpeed;
 		rainOffset[1] -= diff/(2);
@@ -194,6 +248,29 @@ function Renderer(canvasId){
 			var onePixelAttr = gl.getUniformLocation(activeProgram, "onePixel");
 			var offsetAttr = gl.getUniformLocation(activeProgram, "offset");
 			var parallaxAttr = gl.getUniformLocation(activeProgram, "parallax");
+			var preserveAlphaAttr = gl.getUniformLocation(activeProgram, "preserveAlpha");
+
+			var sunIntensity = 1 - (Math.max(sunPosition[1], 0.3)-0.3);
+
+			var ambientLightAttr = gl.getUniformLocation(activeProgram, "ambientLight");
+			gl.uniform3f(ambientLightAttr,
+				ambientLight[0],
+				ambientLight[1],
+				ambientLight[2]
+			);
+
+			var sunLightAttr = gl.getUniformLocation(activeProgram, "sunLight");
+			/*gl.uniform3f(sunLightAttr,
+				(0.8+(Math.max(Math.abs(sunPosition[0]), 0.7)-0.7))*sunIntensity,
+				(0.8)*sunIntensity,
+				(0.3+(1-Math.abs(sunPosition[0]))*0.4))*sunIntensity;*/
+
+			gl.uniform3f(sunLightAttr,
+				sunLight[0],
+				sunLight[1],
+				sunLight[2]
+			);
+
 
 			gl.bindBuffer(gl.ARRAY_BUFFER, vertexBuffer);
 			
@@ -212,6 +289,13 @@ function Renderer(canvasId){
 			} else {
 				gl.uniform2f(offsetAttr, offsetX, 0);
 			}
+
+			if(layers[i].type == "haze"){
+				gl.uniform1i(preserveAlphaAttr, true);
+			} else {
+				gl.uniform1i(preserveAlphaAttr, false);
+			}
+			
 			gl.uniform1f(parallaxAttr, layers[i].parallax);
 
 			gl.disable(gl.DEPTH_TEST);
@@ -222,7 +306,7 @@ function Renderer(canvasId){
 
 		}
 
-		//offsetX += 1;
+		offsetX += 1;
 
 		window.requestAnimationFrame(render);
 		

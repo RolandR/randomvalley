@@ -170,7 +170,7 @@ function generateTerrain(canvas, context, settings){
 
 				var height = above + 1;
 
-				height = height + (noise.simplex2(x/(200*scale), y/(200*scale))*0.4);
+				height = height + (noise.simplex2(x/(200*scale), y/(200*scale))*0.05);
 
 				heightmap[i] = height;
 			} else {
@@ -282,6 +282,10 @@ function generateTerrain(canvas, context, settings){
 				} else {
 					hillshadeImage.data[i*4+3] = 0;
 				}
+
+				//hillshadeImage.data[i*4  ] = 255;
+				//hillshadeImage.data[i*4+1] = 255;
+				//hillshadeImage.data[i*4+2] = 255;
 
 			}
 		}

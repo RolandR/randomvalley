@@ -235,6 +235,8 @@ function buildLandscape(){
 		windSpeed = 0 - windSpeed;
 	}
 
+	var hazeIntensity = 0.2;
+
 	/*sunBrightness = 0.5;
 	lightColor = [200, 200, 210];
 	hazeColor = "180, 190, 200";
@@ -255,7 +257,7 @@ function buildLandscape(){
 	var heightSpan = 0.1+Math.random()*0.6;
 	var ruggednessSpan = 1;
 
-	//heightSpan = 0.2;
+	heightSpan = 0.7;
 
 	generateSkyGradient(preCanvas, preContext, {
 		scale: scale
@@ -293,7 +295,7 @@ function buildLandscape(){
 		,hazeColor: skyHazeColor
 		,hazeStart: -0.5
 	});
-	renderTransparent8bit((layer+1)/(layers+1));
+	render8bit((layer+1)/(layers+1), false, "haze");
 	
 	addClouds(layer);
 
@@ -515,7 +517,7 @@ function buildLandscape(){
 			,hazeColor: hazeColor
 			,hazeStart: 1 - Math.sqrt((layers-layer+1)/(layers+1))*(heightSpan+ruggednessSpan)*2
 		});
-		renderTransparent8bit((layer+1)/(layers+1));
+		render8bit((layer+1)/(layers+1), false, "haze");
 	}
 
 
@@ -523,6 +525,7 @@ function buildLandscape(){
 		
 		var image = preContext.getImageData(0, 0, preCanvas.width, preCanvas.height);
 
+		/*
 		var colorResolution = 16;
 
 		var lightColorR = lightColor[0]/255;
@@ -555,6 +558,8 @@ function buildLandscape(){
 				image.data[i+3] = 0;
 			}
 		};
+		*/
+		
 
 		var canvas = document.createElement("canvas");
 		canvas.height = height*scale;
@@ -576,7 +581,7 @@ function buildLandscape(){
 		
 	}
 
-	function renderTransparent8bit(layer){
+	/*function renderTransparent8bit(layer){
 		var image = preContext.getImageData(0, 0, preCanvas.width, preCanvas.height);
 
 		var colorResolution = 16;
@@ -620,7 +625,7 @@ function buildLandscape(){
 		preContext.clearRect(0, 0, preCanvas.width, preCanvas.height);
 
 		return canvas;
-	}
+	}*/
 
 	function renderRain(layer, speed){
 		var image = preContext.getImageData(0, 0, preCanvas.width, preCanvas.height);
