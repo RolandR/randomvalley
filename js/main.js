@@ -274,10 +274,12 @@ function buildLandscape(){
 		,skyBrightness: skyBrightness
 	});
 
-	var starsIntensity = 0;
-	if(dayTime < 0){
-		starsIntensity = 0 - dayTime;
-	}
+	render8bit((layer+1)/(layers+1), true, "haze");
+
+	//var starsIntensity = 0;
+	//if(dayTime < 0){
+	//	starsIntensity = 0 - dayTime;
+	//}
 
 	renderer.setSettings({
 		windSpeed: windSpeed
@@ -285,13 +287,13 @@ function buildLandscape(){
 
 	console.log("Wind speed: "+windSpeed);
 
-	generateStars(preCanvas, preContext, {intensity: starsIntensity, scale: scale});
+	generateStars(preCanvas, preContext, {intensity: 1, scale: scale});
 	
 	//generateAurora(preCanvas, preContext, {intensity: 1, scale: scale});
 	
 	//generateLightning(preCanvas, preContext, {intensity: 1, scale: scale});
 
-	render8bit((layer+1)/(layers+1), true, "default");
+	render8bit((layer+1)/(layers+1), true, "stars");
 	
 	generateCirrus(preCanvas, preContext, {
 		scale: scale

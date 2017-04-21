@@ -123,7 +123,46 @@ void main(void){
 
 
 
+/* == Stars == */
 
+var starShaderText = `
+
+precision mediump float;
+
+uniform sampler2D u_image;
+
+uniform vec2 onePixel;
+uniform vec2 offset;
+uniform float parallax;
+
+uniform vec3 ambientLight;
+uniform vec3 sunLight;
+
+uniform bool preserveAlpha;
+
+varying vec2 texCoord;
+
+vec2 getCoords(vec2 coord, vec2 offset){
+	return mod(coord + onePixel * floor(offset), 1.0);
+}
+
+void main(void){
+
+	vec4 color = texture2D(u_image, getCoords(texCoord, offset*parallax));
+	
+	color.rgb = color.rgb;
+
+	float noise = fract(sin(dot(getCoords(texCoord, offset*parallax), vec2(12.9898,78.233))) * 43758.5453);
+	color.rgb += color.rgb * (noise-0.5)/32.0 + (noise-0.5)/32.0;
+	color = floor((color)*16.0)/16.0;
+
+	color.a = color.a - sunLight.r;
+	
+	gl_FragColor = color;
+	
+}
+
+`;
 
 
 

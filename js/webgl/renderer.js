@@ -49,6 +49,15 @@ function Renderer(canvasId){
 	gl.attachShader(terrainProgram, terrShader);
 	gl.linkProgram(terrainProgram);
 
+	var starShader = gl.createShader(gl.FRAGMENT_SHADER);
+	gl.shaderSource(starShader, starShaderText);
+	gl.compileShader(starShader);
+
+	var starProgram = gl.createProgram();
+	gl.attachShader(starProgram, vertShader); 
+	gl.attachShader(starProgram, starShader);
+	gl.linkProgram(starProgram);
+
 	if(gl.getShaderInfoLog(vertShader)){
 		console.warn(gl.getShaderInfoLog(vertShader));
 	}
@@ -63,6 +72,12 @@ function Renderer(canvasId){
 	}
 	if(gl.getProgramInfoLog(terrainProgram)){
 		console.warn(gl.getProgramInfoLog(terrainProgram));
+	}
+	if(gl.getShaderInfoLog(starShader)){
+		console.warn(gl.getShaderInfoLog(starShader));
+	}
+	if(gl.getProgramInfoLog(starProgram)){
+		console.warn(gl.getProgramInfoLog(starProgram));
 	}
 
 
@@ -236,6 +251,14 @@ function Renderer(canvasId){
 
 				var sunPositionAttr = gl.getUniformLocation(activeProgram, "sunPosition");
 				gl.uniform2f(sunPositionAttr, sunPosition[0], sunPosition[1]);
+				
+			} else if(layers[i].type == "stars"){
+
+				gl.useProgram(starProgram);
+				activeProgram = starProgram;
+
+				gl.activeTexture(gl.TEXTURE0);
+				gl.bindTexture(gl.TEXTURE_2D, layers[i].texture);
 				
 			} else {
 				gl.useProgram(shaderProgram);
