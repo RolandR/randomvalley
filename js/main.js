@@ -45,8 +45,9 @@ function buildLandscape(){
 	var cirrusDensity;
 	var dayTime; // -1 is night, 1 is day
 	var hazeIntensity;
+	var windSpeed;
 
-	var randTime = 0;
+	//var randTime = 0.5;
 
 	if(randTime < daytimeProbabilites[0]){
 		//Early Dawn
@@ -66,8 +67,8 @@ function buildLandscape(){
 			,1 // Cloudy
 			,1 // Heavy Cirrus
 			,1 // Fog
-			,1 // Light Rain
-			,1 // Heavy Rain
+			,2 // Light Rain
+			,2 // Heavy Rain
 		]
 		
 	} else if(randTime < daytimeProbabilites[1]){
@@ -151,7 +152,7 @@ function buildLandscape(){
 	}
 
 	var randWeather = Math.random();
-	randWeather = 1;
+	//randWeather = 1;
 
 	//var sunBrightness;
 	var cirrusDensity;
@@ -169,6 +170,7 @@ function buildLandscape(){
 		cirrusDensity = 0.3;
 		hazeIntensity *= 0.3;
 		skyHazeIntensity = 2.8*hazeIntensity;
+		windSpeed = Math.pow(Math.random(), 2)*0.1;
 	} else if(randWeather < weatherProbabilities[1]){
 		//Beautiful day
 		console.log("Weather: Beautiful day");
@@ -177,6 +179,7 @@ function buildLandscape(){
 		cirrusDensity = 0.4+Math.random()*0.4;
 		hazeIntensity *= 0.5;
 		skyHazeIntensity = 3*hazeIntensity;
+		windSpeed = Math.pow(Math.random(), 2)*0.6;
 	} else if(randWeather < weatherProbabilities[2]){
 		//Cloudy
 		console.log("Weather: Cloudy");
@@ -185,6 +188,7 @@ function buildLandscape(){
 		cirrusDensity = 0.8;
 		hazeIntensity *= 0.8;
 		skyHazeIntensity = 3*hazeIntensity;
+		windSpeed = Math.random()*1.5;
 	} else if(randWeather < weatherProbabilities[3]){
 		//Heavy Cirrus
 		console.log("Weather: Heavy Cirrus");
@@ -193,6 +197,7 @@ function buildLandscape(){
 		cirrusDensity = 2;
 		hazeIntensity *= 0.5;
 		skyHazeIntensity = 1*hazeIntensity;
+		windSpeed = Math.pow(Math.random(), 2)*0.4;
 	} else if(randWeather < weatherProbabilities[4]){
 		//Fog
 		console.log("Weather: Fog");
@@ -201,6 +206,7 @@ function buildLandscape(){
 		cirrusDensity = 0;
 		hazeIntensity = 1;
 		skyHazeIntensity = 3*hazeIntensity;
+		windSpeed = Math.pow(Math.random(), 2)*0.2;
 	} else if(randWeather < weatherProbabilities[5]){
 		//Light Rain
 		console.log("Weather: Light Rain");
@@ -211,6 +217,7 @@ function buildLandscape(){
 		skyHazeIntensity = 3*hazeIntensity;
 		rain = true;
 		rainIntensity = 0.3;
+		windSpeed = Math.random()*1;
 	} else {
 		//Heavy Rain
 		console.log("Weather: Heavy Rain");
@@ -221,6 +228,11 @@ function buildLandscape(){
 		skyHazeIntensity = 3*hazeIntensity;
 		rain = true;
 		rainIntensity = 1;
+		windSpeed = Math.random()*2;
+	}
+
+	if(Math.random() < 0.5){
+		windSpeed = 0 - windSpeed;
 	}
 
 	/*sunBrightness = 0.5;
@@ -243,7 +255,7 @@ function buildLandscape(){
 	var heightSpan = 0.1+Math.random()*0.6;
 	var ruggednessSpan = 1;
 
-	heightSpan = 0.7;
+	//heightSpan = 0.2;
 
 	generateSkyGradient(preCanvas, preContext, {
 		scale: scale
@@ -255,14 +267,20 @@ function buildLandscape(){
 		starsIntensity = 0 - dayTime;
 	}
 
+	renderer.setSettings({
+		windSpeed: windSpeed
+	});
+
+	console.log("Wind speed: "+windSpeed);
+
 	generateStars(preCanvas, preContext, {intensity: starsIntensity, scale: scale});
 	
 	//generateAurora(preCanvas, preContext, {intensity: 1, scale: scale});
 	
 	//generateLightning(preCanvas, preContext, {intensity: 1, scale: scale});
 
-	render8bit((layer+1)/(layers+1), true);
-
+	render8bit((layer+1)/(layers+1), true, "default");
+	
 	generateCirrus(preCanvas, preContext, {
 		scale: scale
 		,cirrusDensity: cirrusDensity
@@ -304,7 +322,7 @@ function buildLandscape(){
 	//return;
 	
 
-	render8bit((layer+1)/(layers+1), false);
+	render8bit((layer+1)/(layers+1), false, "default");
 
 	//return;
 	
@@ -330,7 +348,7 @@ function buildLandscape(){
 		,hillshadeIntensity: 4 * sunBrightness
 	});
 	
-	render8bit((layer+1)/(layers+1), false);
+	render8bit((layer+1)/(layers+1), false, "default");
 
 	addHaze(layer);
 
@@ -354,7 +372,7 @@ function buildLandscape(){
 		,hillshadeIntensity: 3 * sunBrightness
 	});
 
-	render8bit((layer+1)/(layers+1), false);
+	render8bit((layer+1)/(layers+1), false, "default");
 
 	addHaze(layer);
 
@@ -362,8 +380,8 @@ function buildLandscape(){
 
 
 	if(rain){
-		generateRain(preCanvas, preContext, {intensity: rainIntensity, scale: scale/2, farAway: true});
-		renderRain((layer+1)/(layers+1), 0.25);
+		generateRain(preCanvas, preContext, {intensity: rainIntensity, scale: scale/2, farAway: true, windSpeed: windSpeed});
+		renderRain((layer+1)/(layers+1), 0.1);
 	}
 
 
@@ -384,15 +402,15 @@ function buildLandscape(){
 		,hillshadeIntensity: 1 * sunBrightness
 	});
 
-	render8bit((layer+1)/(layers+1), false);
+	render8bit((layer+1)/(layers+1), false, "default");
 	
 	addHaze(layer);
 
 	addClouds(layer);
 
 	if(rain){
-		generateRain(preCanvas, preContext, {intensity: rainIntensity, scale: scale, farAway: true});
-		renderRain((layer+1)/(layers+1), 0.4);
+		generateRain(preCanvas, preContext, {intensity: rainIntensity, scale: scale, farAway: true, windSpeed: windSpeed});
+		renderRain((layer+1)/(layers+1), 0.2);
 	}
 
 	layer++;
@@ -412,16 +430,22 @@ function buildLandscape(){
 		,hillshadeIntensity: 1 * sunBrightness
 	});
 
-	render8bit((layer+1)/(layers+1), false);
-
-	if(rain){
-		generateRain(preCanvas, preContext, {intensity: rainIntensity, scale: scale});
-		renderRain((layer+1)/(layers+1), 1);
-	}
+	render8bit((layer+1)/(layers+1), false, "default");
 	
 	addHaze(layer);
 
 	addClouds(layer);
+
+	if(rain){
+		generateRain(preCanvas, preContext, {intensity: rainIntensity, scale: scale, windSpeed: windSpeed});
+		renderRain((layer+1)/(layers+1), 1.2);
+
+		generateRain(preCanvas, preContext, {intensity: rainIntensity, scale: scale, windSpeed: windSpeed});
+		renderRain((layer+1)/(layers+1)+0.05, 1.6);
+
+		generateRain(preCanvas, preContext, {intensity: rainIntensity, scale: scale, windSpeed: windSpeed});
+		renderRain((layer+1)/(layers+1)+0.1, 1.9);
+	}
 
 	layer++;
 	var terrain = generateTerrain(preCanvas, preContext, {
@@ -439,20 +463,14 @@ function buildLandscape(){
 		,hillshadeIntensity: 1 * sunBrightness
 	});
 
-	render8bit((layer+1)/(layers+1), false);
+	render8bit((layer+1)/(layers+1), false, "default");
 	
 	addHaze(layer);
 
 	if(rain){
 
-		generateRain(preCanvas, preContext, {intensity: rainIntensity, scale: scale});
+		generateRain(preCanvas, preContext, {intensity: rainIntensity, scale: scale, windSpeed: windSpeed});
 		renderRain((layer+1)/(layers+1), 1);
-
-		generateRain(preCanvas, preContext, {intensity: rainIntensity, scale: scale});
-		renderRain((layer+1)/(layers+1)+0.05, 1.2);
-
-		generateRain(preCanvas, preContext, {intensity: rainIntensity, scale: scale});
-		renderRain((layer+1)/(layers+1)+0.1, 1.5);
 
 	}
 
@@ -467,7 +485,7 @@ function buildLandscape(){
 				,segments: ~~(Math.random()*3 + 2)
 				,scale: Math.random()*1.2*scale + 1.6*scale
 			});
-			render8bit((layer+1)/(layers+1), false);
+			render8bit((layer+1)/(layers+1), false, "default");
 
 			nextTree = Math.random() * 100 * scale + 20 * scale;
 		}
@@ -476,19 +494,13 @@ function buildLandscape(){
 
 	function addClouds(layer){
 		var distance = (layer/layers)*(layer/layers);
-		for(var i = 0; i < ~~(Math.random()*cloudiness*(1-distance)*10); i++){
-			generateCloud(preCanvas, preContext, {
-				 cx: Math.random() * preCanvas.width
-				,cy: (1-distance) * preCanvas.height * (1-heightSpan) + (Math.random()-0.5) * preCanvas.height/6
-				,count: 3 + ~~(Math.random()*5)
-				,initialRadius: 30*scale + distance*20
-				,resolution: 100 * distance + 20
-			});
-		}
+		var cloudsCount = ~~(Math.random()*cloudiness*(1-distance)*10);
+		generateClouds(preCanvas, preContext, cloudsCount, distance, heightSpan, scale);
+		
 		generateHaze(preCanvas, preContext, {intensity: 0.1 * ((layers+1) / (layer+1)) * hazeIntensity, scale: scale, hazeColor: hazeColor, hazeStart: -1});
-		var cloud = render8bit((layer+1)/(layers+1), false);
+		var cloud = render8bit((layer+1)/(layers+1), false, "cloud");
 		var left = 0;
-		//setInterval(function(){cloud.style.left = left+"px"; left += 1/scale; }, 800 + 800 * Math.random());
+		
 	}
 
 	function addHaze(layer){
@@ -502,7 +514,7 @@ function buildLandscape(){
 	}
 
 
-	function render8bit(layer, ignoreLightColor){
+	function render8bit(layer, ignoreLightColor, type){
 		
 		var image = preContext.getImageData(0, 0, preCanvas.width, preCanvas.height);
 
@@ -542,13 +554,12 @@ function buildLandscape(){
 		var canvas = document.createElement("canvas");
 		canvas.height = height*scale;
 		canvas.width = width*scale;
-		document.getElementById("canvasDiv").appendChild(canvas);
 		var context = canvas.getContext("2d");
 
 		preContext.putImageData(image, 0, 0);
 		context.drawImage(preCanvas, 0, 0);
 
-		renderer.addLayer(canvas, layer, "default");
+		renderer.addLayer(canvas, layer, type);
 
 		preContext.clearRect(0, 0, preCanvas.width, preCanvas.height);
 
@@ -590,7 +601,6 @@ function buildLandscape(){
 		var canvas = document.createElement("canvas");
 		canvas.height = height*scale;
 		canvas.width = width*scale;
-		document.getElementById("canvasDiv").appendChild(canvas);
 		var context = canvas.getContext("2d");
 
 		preContext.putImageData(image, 0, 0);
@@ -627,6 +637,8 @@ function buildLandscape(){
 				image.data[i  ] = colorResolution * Math.round(image.data[i  ]/colorResolution);
 				image.data[i+1] = colorResolution * Math.round(image.data[i+1]/colorResolution);
 				image.data[i+2] = colorResolution * Math.round(image.data[i+2]/colorResolution);
+
+				image.data[i+3] = image.data[i+3]/2;
 				
 		};
 
@@ -642,28 +654,19 @@ function buildLandscape(){
 
 		renderer.addLayer(canvas, layer, "rain", {rainSpeed: speed});
 
-		/*var rainDiv = document.createElement("div");
-		rainDiv.className = "animateDiv";
-		rainDiv.style.background = "url("+canvas.toDataURL()+")";
-		rainDiv.style.backgroundSize = canvas.width / scale + "px " + canvas.height / scale + "px";
-		document.getElementById("canvasDiv").appendChild(rainDiv);
-
-		preContext.clearRect(0, 0, preCanvas.width, preCanvas.height);
-
-		var posX = 0;
-		var posY = 0;
-
-		var framerate = 60;
-
-		setInterval(function(){
-			posX += 2*speed * 60/framerate;
-			posY += 5*speed * 60/framerate;
-
-			rainDiv.style.backgroundPosition = ~~(posX)/scale + "px " + ~~(posY)/scale + "px";
-			
-		}, 1000/framerate);*/
-
 		return canvas;
 	}
 
 }
+
+
+
+
+
+
+
+
+
+
+
+

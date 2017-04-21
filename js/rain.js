@@ -6,20 +6,29 @@ function generateRain(canvas, context, settings){
 
 	if(!farAway){
 
-	var count = 1000 * intensity * scale * scale;
+		context.fillStyle = "rgba(180, 180, 180, 0)";
+		context.fillRect(0, 0, canvas.width, canvas.height);
 
-	context.beginPath();
-	context.strokeStyle = "rgba(180, 180, 180, 0.1)";
-	context.lineWidth = 0.5;
+		var count = 1000 * intensity * scale * scale;
 
-	for(var i = 0; i < count; i++){
+		context.beginPath();
+		var lightness = ~~(Math.random()*40+140);
+		context.strokeStyle = "rgba("+lightness+", "+lightness+", "+lightness+", 1)";
+		context.lineWidth = 1;
 
-		var posX = ~~(Math.random() * canvas.width)+0.5;
-		var posY = ~~(Math.random() * canvas.height)+0.5;
-		context.moveTo(posX, posY);
-		context.lineTo(posX + 1, posY + 2.5);
-		context.stroke();
-	}
+		for(var i = 0; i < count; i++){
+
+			var posX = ~~(Math.random() * canvas.width)+0.5;
+			var posY = ~~(Math.random() * canvas.height)+0.5;
+			var yLength = Math.random()*15;
+			
+			context.moveTo(posX, posY);
+			context.lineTo(
+				~~(posX + yLength*settings.windSpeed)+0.5,
+				~~(posY + yLength)+0.5
+			);
+			context.stroke();
+		}
 
 	} else {
 		var cirrusCanvas = document.createElement("canvas");
@@ -27,7 +36,7 @@ function generateRain(canvas, context, settings){
 		cirrusCanvas.height = canvas.height;
 		var cirrusContext = cirrusCanvas.getContext("2d");
 		
-		cirrusContext.fillStyle = "rgba(180, 180, 180, 0.2)";
+		cirrusContext.fillStyle = "rgba(180, 180, 180, 1)";
 		cirrusContext.fillRect(0, 0, cirrusCanvas.width, cirrusCanvas.height);
 
 		var image = cirrusContext.getImageData(0, 0, cirrusCanvas.width, cirrusCanvas.height);
@@ -49,16 +58,17 @@ function generateRain(canvas, context, settings){
 				y = cirrusCanvas.height - y;
 			}
 
-			var lightness = (noise.simplex2((x+dimXa/10)/dimXa, (y+dimYa/10)/dimYa)/2+0.5)*30+230;
+			var lightness = (noise.simplex2((x+dimXa/10)/dimXa, (y+dimYa/10)/dimYa)/2+0.5)*180+70;
 
-			image.data[i] *= 255/lightness;
-			image.data[i+1] *= 255/lightness;
-			image.data[i+2] *= 255/lightness;
+			image.data[i] = lightness;
+			image.data[i+1] = lightness;
+			image.data[i+2] = lightness;
 
-			var opacity = (noise.simplex2(x/dimXa, y/dimYa)/2+0.5);
+			/*var opacity = (noise.simplex2(x/dimXa, y/dimYa)/2+0.5);
 			opacity = opacity * (noise.simplex2(x/dimXb, y/dimYb)/2+0.5);
+			opacity = opacity/2 + 0.1;*/
 			
-			image.data[i+3] = opacity * 255;
+			image.data[i+3] = 180;
 		}
 
 		cirrusContext.putImageData(image, 0, 0);

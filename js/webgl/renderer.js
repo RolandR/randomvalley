@@ -124,14 +124,17 @@ function Renderer(canvasId){
 	var offsetX = 0;
 	var rainOffset = [0, 0];
 	var lastTime = Date.now();
+	var cloudOffset = 0;
+	var settings = {};
 
 	function render(){
 
 		var now = Date.now();
 		var diff = now - lastTime;
 		lastTime = now;
-		rainOffset[0] -= diff/(5*2);
-		rainOffset[1] -= diff/(2*2);
+		rainOffset[0] -= (diff/(2))*settings.windSpeed;
+		rainOffset[1] -= diff/(2);
+		cloudOffset -= (diff/100)*settings.windSpeed;
 
 		gl.viewport(0, 0, canvas.width, canvas.height);
 
@@ -154,6 +157,8 @@ function Renderer(canvasId){
 					rainOffset[0]*layers[i].settings.rainSpeed + offsetX,
 					rainOffset[1]*layers[i].settings.rainSpeed
 				);
+			} else if(layers[i].type == "cloud"){
+				gl.uniform2f(offsetAttr, offsetX+cloudOffset, 0);
 			} else {
 				gl.uniform2f(offsetAttr, offsetX, 0);
 			}
@@ -173,9 +178,14 @@ function Renderer(canvasId){
 		
 	}
 
+	function setSettings(newSettings){
+		settings = newSettings;
+	}
+
 	return{
 		 render: render
 		,addLayer: addLayer
+		,setSettings: setSettings
 	};
 
 }
