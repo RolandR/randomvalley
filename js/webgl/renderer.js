@@ -4,6 +4,9 @@ function Renderer(canvasId){
 	var canvas = document.getElementById(canvasId);
 	var gl = canvas.getContext("webgl") || canvas.getContext("experimental-webgl");
 
+	var float_texture_ext = gl.getExtension("OES_texture_float");
+	var float_texture_linear_ext = gl.getExtension("OES_texture_float_linear");
+
 
 	var width = Math.max(document.documentElement.clientWidth, window.innerWidth || 0);
 	var height = Math.max(document.documentElement.clientHeight, window.innerHeight || 0);
@@ -12,8 +15,7 @@ function Renderer(canvasId){
 	
 	canvas.width = width*scale;
 	canvas.height = height*scale;
-
-	var shaderProgram;
+	
 	var size;
 
 	var lastHeight = canvas.height;
@@ -25,39 +27,27 @@ function Renderer(canvasId){
 	/*=========================Shaders========================*/
 
 
-	// Create a vertex shader object
 	var vertShader = gl.createShader(gl.VERTEX_SHADER);
-
-	// Attach vertex shader source code
 	gl.shaderSource(vertShader, vertexShader);
-
-	// Compile the vertex shader
 	gl.compileShader(vertShader);
 
-	// Create fragment shader object
 	var fragShader = gl.createShader(gl.FRAGMENT_SHADER);
-
-	// Attach fragment shader source code
 	gl.shaderSource(fragShader, fragmentShader);
-
-	// Compile the fragmentt shader
 	gl.compileShader(fragShader);
 
-	// Create a shader program object to store
-	// the combined shader program
-	shaderProgram = gl.createProgram();
+	var terrShader = gl.createShader(gl.FRAGMENT_SHADER);
+	gl.shaderSource(terrShader, terrainShader);
+	gl.compileShader(terrShader);
 
-	// Attach a vertex shader
+	var shaderProgram = gl.createProgram();
 	gl.attachShader(shaderProgram, vertShader); 
-
-	// Attach a fragment shader
 	gl.attachShader(shaderProgram, fragShader);
-
-	// Link both programs
 	gl.linkProgram(shaderProgram);
 
-	// Use the combined shader program object
-	gl.useProgram(shaderProgram);
+	var terrainProgram = gl.createProgram();
+	gl.attachShader(terrainProgram, vertShader); 
+	gl.attachShader(terrainProgram, terrShader);
+	gl.linkProgram(terrainProgram);
 
 	if(gl.getShaderInfoLog(vertShader)){
 		console.warn(gl.getShaderInfoLog(vertShader));
@@ -67,6 +57,12 @@ function Renderer(canvasId){
 	}
 	if(gl.getProgramInfoLog(shaderProgram)){
 		console.warn(gl.getProgramInfoLog(shaderProgram));
+	}
+	if(gl.getShaderInfoLog(terrShader)){
+		console.warn(gl.getShaderInfoLog(terrShader));
+	}
+	if(gl.getProgramInfoLog(terrainProgram)){
+		console.warn(gl.getProgramInfoLog(terrainProgram));
 	}
 
 
@@ -100,10 +96,6 @@ function Renderer(canvasId){
 	// Enable the attribute
 	gl.enableVertexAttribArray(coord);
 	
-	var onePixelAttr = gl.getUniformLocation(shaderProgram, "onePixel");
-	var offsetAttr = gl.getUniformLocation(shaderProgram, "offset");
-	var parallaxAttr = gl.getUniformLocation(shaderProgram, "parallax");
-	
 
 	function addLayer(image, parallax, type, settings){
 		var texture = gl.createTexture();
@@ -112,6 +104,28 @@ function Renderer(canvasId){
 		gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
 		gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
 		gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+
+		if(type == "terrain"){
+			var heightmap = gl.createTexture();
+			gl.bindTexture(gl.TEXTURE_2D, heightmap);
+			gl.texImage2D(
+				gl.TEXTURE_2D,
+				0,
+				gl.RGB,
+				image.width,
+				image.height,
+				0,
+				gl.RGB,
+				gl.FLOAT,
+				Float32Array.from(settings.heightmap)
+			);
+			gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
+			gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
+			gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+			gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+
+			settings.heightmap = heightmap;
+		}
 		
 		layers.push({
 			 texture: texture
@@ -126,24 +140,60 @@ function Renderer(canvasId){
 	var lastTime = Date.now();
 	var cloudOffset = 0;
 	var settings = {};
+	var sunPosition = [0, 0];
 
 	function render(){
 
 		var now = Date.now();
 		var diff = now - lastTime;
 		lastTime = now;
+		
+		var nanoTime = window.performance.now();
+		sunPosition = [Math.sin(nanoTime/1000), Math.cos(nanoTime/1000)];
+		
 		rainOffset[0] -= (diff/(2))*settings.windSpeed;
 		rainOffset[1] -= diff/(2);
 		cloudOffset -= (diff/100)*settings.windSpeed;
+		var activeProgram;
 
 		gl.viewport(0, 0, canvas.width, canvas.height);
 
 		for(var i = 0; i < layers.length; i++){
 
-			gl.bindTexture(gl.TEXTURE_2D, layers[i].texture);
+			if(layers[i].type == "terrain"){
+				gl.useProgram(terrainProgram);
+				activeProgram = terrainProgram;
 
-			// Tell WebGL to use our shader program pair
-			gl.useProgram(shaderProgram);
+				var u_image0Location = gl.getUniformLocation(activeProgram, "u_image0");
+				var u_image1Location = gl.getUniformLocation(activeProgram, "u_image1");
+				gl.uniform1i(u_image0Location, 0);
+				gl.uniform1i(u_image1Location, 1);
+
+				gl.activeTexture(gl.TEXTURE0);
+				gl.bindTexture(gl.TEXTURE_2D, layers[i].texture);
+				gl.activeTexture(gl.TEXTURE1);
+				gl.bindTexture(gl.TEXTURE_2D, layers[i].settings.heightmap);
+
+				var scaleAttr = gl.getUniformLocation(activeProgram, "scale");
+				gl.uniform1f(scaleAttr, layers[i].settings.scale);
+
+				var hillshadeIntensityAttr = gl.getUniformLocation(activeProgram, "hillshadeIntensity");
+				gl.uniform1f(hillshadeIntensityAttr, layers[i].settings.hillshadeIntensity);
+
+				var sunPositionAttr = gl.getUniformLocation(activeProgram, "sunPosition");
+				gl.uniform2f(sunPositionAttr, sunPosition[0], sunPosition[1]);
+				
+			} else {
+				gl.useProgram(shaderProgram);
+				activeProgram = shaderProgram;
+
+				gl.activeTexture(gl.TEXTURE0);
+				gl.bindTexture(gl.TEXTURE_2D, layers[i].texture);
+			}
+
+			var onePixelAttr = gl.getUniformLocation(activeProgram, "onePixel");
+			var offsetAttr = gl.getUniformLocation(activeProgram, "offset");
+			var parallaxAttr = gl.getUniformLocation(activeProgram, "parallax");
 
 			gl.bindBuffer(gl.ARRAY_BUFFER, vertexBuffer);
 			

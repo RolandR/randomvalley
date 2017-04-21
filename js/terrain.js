@@ -9,7 +9,8 @@ function generateTerrain(canvas, context, settings){
 		scale,
 		snow,
 		snowness,
-		hillshadeIntensity
+		hillshadeIntensity,
+		layer
 		
 	} = settings;
 
@@ -21,7 +22,7 @@ function generateTerrain(canvas, context, settings){
 
 	generateStep();
 	smooth(smoothness);
-	render();
+	return render();
 	//erode(0, 0);
 
 	function addTerrainPoints(){
@@ -125,7 +126,7 @@ function generateTerrain(canvas, context, settings){
 		context.fill();
 
 		
-		generateHeightmap();
+		return generateHeightmap();
 	}
 
 	function generateHeightmap(){
@@ -208,10 +209,10 @@ function generateTerrain(canvas, context, settings){
 			heightmap.set(smoothHeightmap);
 		}
 
-		generateHillshade(heightmap);
+		return paint(heightmap);
 	}
 
-	function generateHillshade(heightmap){
+	function paint(heightmap){
 
 		var hillshadeImage = context.getImageData(0, 0, canvas.width, canvas.height);
 
@@ -260,20 +261,10 @@ function generateTerrain(canvas, context, settings){
 						}
 					}
 
-					var grade = 0;
+					/*var grade = 0;
 					if(x != 0){
 						grade = heightmap[i] - heightmap[h+(x-1+canvas.width)%canvas.width];
 					}
-
-					/*if(grade > 0){
-						hillshadeImage.data[i*4  ] += 5;
-						hillshadeImage.data[i*4+1] += 5;
-						hillshadeImage.data[i*4+2] += 5;
-					} else {
-						hillshadeImage.data[i*4  ] -= 5;
-						hillshadeImage.data[i*4+1] -= 5;
-						hillshadeImage.data[i*4+2] -= 5;
-					}*/
 					
 					grade = grade * (hillshadeIntensity/(scale+1));
 
@@ -286,7 +277,7 @@ function generateTerrain(canvas, context, settings){
 
 					hillshadeImage.data[i*4  ] *= 1+grade;
 					hillshadeImage.data[i*4+1] *= 1+grade;
-					hillshadeImage.data[i*4+2] *= 1+grade;
+					hillshadeImage.data[i*4+2] *= 1+grade;*/
 					
 				} else {
 					hillshadeImage.data[i*4+3] = 0;
@@ -296,6 +287,14 @@ function generateTerrain(canvas, context, settings){
 		}
 
 		context.putImageData(hillshadeImage, 0, 0);
+
+		var paddedHeightmap = new Float32Array(heightmap.length * 3);
+		for (var i = 0; i < heightmap.length; i++) {
+			paddedHeightmap[i*3  ] = heightmap[i];
+			paddedHeightmap[i*3+1] = heightmap[i];
+			paddedHeightmap[i*3+2] = heightmap[i];
+		}
+		return paddedHeightmap;
 	}
 
 	function generateStep(){

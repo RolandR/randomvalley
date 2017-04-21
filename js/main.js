@@ -47,7 +47,7 @@ function buildLandscape(){
 	var hazeIntensity;
 	var windSpeed;
 
-	//var randTime = 0.5;
+	var randTime = 1;
 
 	if(randTime < daytimeProbabilites[0]){
 		//Early Dawn
@@ -152,7 +152,7 @@ function buildLandscape(){
 	}
 
 	var randWeather = Math.random();
-	//randWeather = 1;
+	randWeather = 0;
 
 	//var sunBrightness;
 	var cirrusDensity;
@@ -301,8 +301,8 @@ function buildLandscape(){
 	render8bit((layer+1)/(layers+1), false);*/
 
 	layer++;
-
-	generateTerrain(preCanvas, preContext, {
+	var hillshadeIntensity = 5 * sunBrightness;
+	var heightmap = generateTerrain(preCanvas, preContext, {
 		 haze: 0.7
 		,terrainPoints: [
 			 preCanvas.height - Math.sqrt((layers-layer+1)/(layers+1))*heightSpan*preCanvas.height
@@ -315,14 +315,14 @@ function buildLandscape(){
 		,scale: scale*2
 		,snow: true
 		,snowness: 0.6
-		,hillshadeIntensity: 5 * sunBrightness
+		,hillshadeIntensity: hillshadeIntensity
 	});
 
 	//render8bit((layer+1)/(layers+1), false);
 	//return;
 	
 
-	render8bit((layer+1)/(layers+1), false, "default");
+	render8bit((layer+1)/(layers+1), false, "terrain", {heightmap: heightmap, hillshadeIntensity: hillshadeIntensity});
 
 	//return;
 	
@@ -331,8 +331,8 @@ function buildLandscape(){
 	addClouds(layer);
 
 	layer++;
-
-	generateTerrain(preCanvas, preContext, {
+	var hillshadeIntensity = 4 * sunBrightness;
+	var heightmap = generateTerrain(preCanvas, preContext, {
 		 haze: 0.7
 		,terrainPoints: [
 			 preCanvas.height - Math.sqrt((layers-layer+1)/(layers+1))*heightSpan*preCanvas.height
@@ -345,10 +345,10 @@ function buildLandscape(){
 		,scale: scale*1.5
 		,snow: true
 		,snowness: 0.2
-		,hillshadeIntensity: 4 * sunBrightness
+		,hillshadeIntensity: hillshadeIntensity
 	});
 	
-	render8bit((layer+1)/(layers+1), false, "default");
+	render8bit((layer+1)/(layers+1), false, "terrain", {heightmap: heightmap, hillshadeIntensity: hillshadeIntensity});
 
 	addHaze(layer);
 
@@ -356,7 +356,8 @@ function buildLandscape(){
 
 
 	layer++;
-	generateTerrain(preCanvas, preContext, {
+	var hillshadeIntensity = 3 * sunBrightness;
+	var heightmap = generateTerrain(preCanvas, preContext, {
 		 haze: 0.7
 		,terrainPoints: [
 			 preCanvas.height - Math.sqrt((layers-layer+1)/(layers+1))*heightSpan*preCanvas.height
@@ -369,10 +370,10 @@ function buildLandscape(){
 		,scale: scale
 		,snow: true
 		,snowness: 0.1
-		,hillshadeIntensity: 3 * sunBrightness
+		,hillshadeIntensity: hillshadeIntensity
 	});
 
-	render8bit((layer+1)/(layers+1), false, "default");
+	render8bit((layer+1)/(layers+1), false, "terrain", {heightmap: heightmap, hillshadeIntensity: hillshadeIntensity});
 
 	addHaze(layer);
 
@@ -386,7 +387,8 @@ function buildLandscape(){
 
 
 	layer++;
-	generateTerrain(preCanvas, preContext, {
+	var hillshadeIntensity = 1 * sunBrightness;
+	var heightmap = generateTerrain(preCanvas, preContext, {
 		 haze: 0.5
 		,terrainPoints: [
 			 preCanvas.height - Math.sqrt((layers-layer+1)/(layers+1))*heightSpan*preCanvas.height
@@ -399,10 +401,10 @@ function buildLandscape(){
 		,scale: scale
 		,snow: false
 		,snowness: -0.2
-		,hillshadeIntensity: 1 * sunBrightness
+		,hillshadeIntensity: hillshadeIntensity
 	});
 
-	render8bit((layer+1)/(layers+1), false, "default");
+	render8bit((layer+1)/(layers+1), false, "terrain", {heightmap: heightmap, hillshadeIntensity: hillshadeIntensity});
 	
 	addHaze(layer);
 
@@ -414,7 +416,8 @@ function buildLandscape(){
 	}
 
 	layer++;
-	generateTerrain(preCanvas, preContext, {
+	var hillshadeIntensity = 1 * sunBrightness;
+	var heightmap = generateTerrain(preCanvas, preContext, {
 		 haze: 0.25
 		,terrainPoints: [
 			 preCanvas.height - Math.sqrt((layers-layer+1)/(layers+1))*heightSpan*preCanvas.height
@@ -427,10 +430,10 @@ function buildLandscape(){
 		,scale: scale
 		,snow: false
 		,snowness: -0.7
-		,hillshadeIntensity: 1 * sunBrightness
+		,hillshadeIntensity: hillshadeIntensity
 	});
 
-	render8bit((layer+1)/(layers+1), false, "default");
+	render8bit((layer+1)/(layers+1), false, "terrain", {heightmap: heightmap, hillshadeIntensity: hillshadeIntensity});
 	
 	addHaze(layer);
 
@@ -448,7 +451,9 @@ function buildLandscape(){
 	}
 
 	layer++;
-	var terrain = generateTerrain(preCanvas, preContext, {
+
+	var hillshadeIntensity = 1 * sunBrightness;
+	var heightmap = generateTerrain(preCanvas, preContext, {
 		 haze: 0
 		,terrainPoints: [
 			 preCanvas.height - Math.sqrt((layers-layer+1)/(layers+1))*heightSpan*preCanvas.height
@@ -460,10 +465,10 @@ function buildLandscape(){
 		,ruggedness: 0.1 * ruggednessSpan
 		,scale: scale
 		,snow: false
-		,hillshadeIntensity: 1 * sunBrightness
+		,hillshadeIntensity: hillshadeIntensity
 	});
 
-	render8bit((layer+1)/(layers+1), false, "default");
+	render8bit((layer+1)/(layers+1), false, "terrain", {heightmap: heightmap, hillshadeIntensity: hillshadeIntensity});
 	
 	addHaze(layer);
 
@@ -514,7 +519,7 @@ function buildLandscape(){
 	}
 
 
-	function render8bit(layer, ignoreLightColor, type){
+	function render8bit(layer, ignoreLightColor, type, settings){
 		
 		var image = preContext.getImageData(0, 0, preCanvas.width, preCanvas.height);
 
@@ -559,9 +564,13 @@ function buildLandscape(){
 		preContext.putImageData(image, 0, 0);
 		context.drawImage(preCanvas, 0, 0);
 
-		renderer.addLayer(canvas, layer, type);
-
 		preContext.clearRect(0, 0, preCanvas.width, preCanvas.height);
+
+		if(!settings){
+			settings = {};
+		}
+		settings.scale = scale;
+		renderer.addLayer(canvas, layer, type, settings);
 
 		return canvas;
 		
