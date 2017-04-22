@@ -1,8 +1,10 @@
 
 
 function generateStars(canvas, context, settings){
-
+	
 	var {scale, density, intensity} = settings;
+
+	context.clearRect(0, 0, canvas.width, canvas.height);
 
 	for(var i = 0; i < 800; i++){
 		var brightness = Math.pow(Math.random(), 1) * intensity;

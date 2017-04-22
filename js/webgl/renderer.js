@@ -58,26 +58,40 @@ function Renderer(canvasId){
 	gl.attachShader(starProgram, starShader);
 	gl.linkProgram(starProgram);
 
+	var hasErrors = false;
+	
 	if(gl.getShaderInfoLog(vertShader)){
 		console.warn(gl.getShaderInfoLog(vertShader));
+		hasErrors = true;
 	}
 	if(gl.getShaderInfoLog(fragShader)){
 		console.warn(gl.getShaderInfoLog(fragShader));
+		hasErrors = true;
 	}
 	if(gl.getProgramInfoLog(shaderProgram)){
 		console.warn(gl.getProgramInfoLog(shaderProgram));
+		hasErrors = true;
 	}
 	if(gl.getShaderInfoLog(terrShader)){
 		console.warn(gl.getShaderInfoLog(terrShader));
+		hasErrors = true;
 	}
 	if(gl.getProgramInfoLog(terrainProgram)){
 		console.warn(gl.getProgramInfoLog(terrainProgram));
+		hasErrors = true;
 	}
 	if(gl.getShaderInfoLog(starShader)){
 		console.warn(gl.getShaderInfoLog(starShader));
+		hasErrors = true;
 	}
 	if(gl.getProgramInfoLog(starProgram)){
 		console.warn(gl.getProgramInfoLog(starProgram));
+		hasErrors = true;
+	}
+
+	if(hasErrors){
+		console.error("Shaders contain errors. Aborting.");
+		return false;
 	}
 
 
@@ -248,9 +262,6 @@ function Renderer(canvasId){
 
 				var hillshadeIntensityAttr = gl.getUniformLocation(activeProgram, "hillshadeIntensity");
 				gl.uniform1f(hillshadeIntensityAttr, layers[i].settings.hillshadeIntensity);
-
-				var sunPositionAttr = gl.getUniformLocation(activeProgram, "sunPosition");
-				gl.uniform2f(sunPositionAttr, sunPosition[0], sunPosition[1]);
 				
 			} else if(layers[i].type == "stars"){
 
@@ -272,6 +283,9 @@ function Renderer(canvasId){
 			var offsetAttr = gl.getUniformLocation(activeProgram, "offset");
 			var parallaxAttr = gl.getUniformLocation(activeProgram, "parallax");
 			var preserveAlphaAttr = gl.getUniformLocation(activeProgram, "preserveAlpha");
+
+			var sunPositionAttr = gl.getUniformLocation(activeProgram, "sunPosition");
+			gl.uniform2f(sunPositionAttr, sunPosition[0], sunPosition[1]);
 
 			var sunIntensity = 1 - (Math.max(sunPosition[1], 0.3)-0.3);
 

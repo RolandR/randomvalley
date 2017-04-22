@@ -10,6 +10,7 @@ uniform float parallax;
 
 uniform vec3 ambientLight;
 uniform vec3 sunLight;
+uniform vec2 sunPosition;
 
 uniform bool preserveAlpha;
 
@@ -137,6 +138,7 @@ uniform float parallax;
 
 uniform vec3 ambientLight;
 uniform vec3 sunLight;
+uniform vec2 sunPosition;
 
 uniform bool preserveAlpha;
 
@@ -148,11 +150,13 @@ vec2 getCoords(vec2 coord, vec2 offset){
 
 void main(void){
 
-	vec4 color = texture2D(u_image, getCoords(texCoord, offset*parallax));
+	vec2 coord = mat2(sunPosition.y, -sunPosition.x, sunPosition.x, sunPosition.y) * (texCoord - vec2(0.5, 0.2)) + vec2(0.5, 0.2);
+
+	vec4 color = texture2D(u_image, getCoords(coord, offset*parallax));
 	
 	color.rgb = color.rgb;
 
-	float noise = fract(sin(dot(getCoords(texCoord, offset*parallax), vec2(12.9898,78.233))) * 43758.5453);
+	float noise = fract(sin(dot(getCoords(coord, offset*parallax), vec2(12.9898,78.233))) * 43758.5453);
 	color.rgb += color.rgb * (noise-0.5)/32.0 + (noise-0.5)/32.0;
 	color = floor((color)*16.0)/16.0;
 
