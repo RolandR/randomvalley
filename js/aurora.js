@@ -1,6 +1,6 @@
 
 
-function generateAurora(canvas, context, settings){
+function generateAurora(canvas, context, imageWidth, imageHeight, settings){
 
 	var {scale, intensity} = settings;
 
@@ -17,8 +17,8 @@ function generateAurora(canvas, context, settings){
 
 	var zoom = 1;
 
-	var vanishX = canvas.width/2;
-	var vanishY = -canvas.height*3;
+	var vanishX = imageWidth/2;
+	var vanishY = -imageHeight*3;
 
 	var horizon = -0.25;
 
@@ -29,11 +29,11 @@ function generateAurora(canvas, context, settings){
 		var renderX = x / (z*zoom);
 		var renderY = y / (z*zoom);
 
-		renderX = ~~((renderX/2+0.5) * canvas.width) + 0.5;
-		renderY = canvas.height - ~~((renderY/2+0.5+horizon) * canvas.height) + 0.5;
+		renderX = ~~((renderX/2+0.5) * imageWidth) + 0.5;
+		renderY = imageHeight - ~~((renderY/2+0.5+horizon) * imageHeight) + 0.5;
 
 		console.log(renderX, renderY);
-		console.log(canvas.width, canvas.height);
+		console.log(imageWidth, imageHeight);
 
 		var len = lineLength / (z*zoom);
 
@@ -72,10 +72,10 @@ function generateAurora(canvas, context, settings){
 			zSpeed += (Math.random()-0.5)*0.1;
 		} while(Math.abs(zSpeed) > 0.5)
 
-		x += xSpeed/canvas.width;
-		z += zSpeed/canvas.width;
+		x += xSpeed/imageWidth;
+		z += zSpeed/imageWidth;
 
-		//x += 1/canvas.width;
+		//x += 1/imageWidth;
 	}
 
 	context.restore();

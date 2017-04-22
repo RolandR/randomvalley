@@ -1,12 +1,12 @@
 
 
-function generateCirrus(canvas, context, settings){
+function generateCirrus(canvas, context, imageWidth, imageHeight, settings){
 
 	var {scale, cirrusDensity, cirrusColor} = settings;
 		
 	var cirrusCanvas = document.createElement("canvas");
-	cirrusCanvas.width = canvas.width;
-	cirrusCanvas.height = canvas.height;
+	cirrusCanvas.width = imageWidth;
+	cirrusCanvas.height = imageHeight;
 	var cirrusContext = cirrusCanvas.getContext("2d");
 	
 	cirrusContext.fillStyle = cirrusColor;

@@ -1,6 +1,6 @@
 
 
-function generateEvergreen(canvas, context, settings){
+function generateEvergreen(canvas, context, imageWidth, imageHeight, settings){
 
 	function r(h, factor){
 		return (Math.random()-0.5) * h * factor;
@@ -17,8 +17,8 @@ function generateEvergreen(canvas, context, settings){
 	var maxSway = Math.PI / 160;
 	var swayFrequency = 1000;
 
-	/*var cx = ~~(canvas.width/2);
-	var cy = ~~(3*canvas.height/4);*/
+	/*var cx = ~~(imageWidth/2);
+	var cy = ~~(3*imageHeight/4);*/
 	
 	var x = cx;
 	var y = cy - segments * 3*scale - 5*scale - stem[1];

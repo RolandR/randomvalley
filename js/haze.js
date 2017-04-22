@@ -1,10 +1,10 @@
 
 
-function generateHaze(canvas, context, settings){
+function generateHaze(canvas, context, imageWidth, imageHeight, settings){
 
 	var {intensity, scale, hazeColor, hazeStart} = settings;
 
-	var gradient = context.createLinearGradient(0, 0, 0, canvas.height);
+	var gradient = context.createLinearGradient(0, 0, 0, imageHeight);
 
 	// var hazeColor = "255, 230, 200"; // Evening red
 	// var hazeColor = "0, 0, 0";
@@ -21,6 +21,6 @@ function generateHaze(canvas, context, settings){
 	}
 	context.fillStyle = gradient;
 
-	context.fillRect(0, 0, canvas.width, canvas.height);
+	context.fillRect(0, 0, imageWidth, imageHeight);
 
 }

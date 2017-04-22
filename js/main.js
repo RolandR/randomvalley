@@ -11,10 +11,13 @@ function buildLandscape(){
 	var preCanvas = document.getElementById("prerenderCanvas");
 	var preContext = preCanvas.getContext("2d");
 
-	var width = Math.max(document.documentElement.clientWidth, window.innerWidth || 0);
-	var height = Math.max(document.documentElement.clientHeight, window.innerHeight || 0);
-
 	var scale = 1/3;
+
+	var width = Math.max(document.documentElement.clientWidth, window.innerWidth || 0) * scale;
+	var height = Math.max(document.documentElement.clientHeight, window.innerHeight || 0) * scale;
+
+	width = ~~width;
+	height = ~~height;
 
 	var daytimeProbabilites = [
 		 1 // Early Dawn
@@ -162,7 +165,7 @@ function buildLandscape(){
 	}
 
 	var randWeather = Math.random();
-	randWeather = 0;
+	//randWeather = 0;
 
 	//var sunBrightness;
 	var cirrusDensity;
@@ -266,10 +269,14 @@ function buildLandscape(){
 	var heightSpan = 0.1+Math.random()*0.6;
 	var ruggednessSpan = 1;
 
-	preCanvas.width = width*scale;
-	preCanvas.height = height*scale;
+	//var max = Math.max(width, height);
+	//preCanvas.width = Math.pow(2, Math.ceil(Math.log2(max)));
+	//preCanvas.height = preCanvas.width;
 
-	heightSpan = 0.7;
+	preCanvas.width = width;
+	preCanvas.height = height;
+
+	//heightSpan = 0.1;
 
 	renderer.setSettings({
 		windSpeed: windSpeed
@@ -277,44 +284,49 @@ function buildLandscape(){
 
 	console.log("Wind speed: "+windSpeed);
 
-	/* ========================== */
+	/* ========================================================================================= */
 
-	generateSkyGradient(preCanvas, preContext, {
+	generateSkyGradient(preCanvas, preContext, width, height,  {
 		scale: scale
 		,skyBrightness: skyBrightness
 	});
 
-	render8bit((layer+1)/(layers+1), true, "haze");	
-	
-	generateStars(preCanvas, preContext, {intensity: 1, scale: scale});
-	render8bit((layer+1)/(layers+1), true, "stars");
+	render(preCanvas, (layer+1)/(layers+1), true, "haze");
+
+	var starCanvas = document.createElement("canvas");
+	var max = Math.max(width, height);
+	starCanvas.width = Math.pow(2, Math.ceil(Math.log2(max)));
+	starCanvas.height = starCanvas.width;
+	var starContext = starCanvas.getContext("2d");
+	generateStars(starCanvas, starContext, starCanvas.width, starCanvas.height, {intensity: 1, scale: scale});
+	render(starCanvas, (layer+1)/(layers+1), true, "stars");
 	
 	//generateAurora(preCanvas, preContext, {intensity: 1, scale: scale});
 	
 	//generateLightning(preCanvas, preContext, {intensity: 1, scale: scale});
 	
-	generateCirrus(preCanvas, preContext, {
+	generateCirrus(preCanvas, preContext, width, height, {
 		scale: scale
 		,cirrusDensity: cirrusDensity
 		,cirrusColor: cirrusColor
 	});
 
-	generateHaze(preCanvas, preContext, {
+	generateHaze(preCanvas, preContext, width, height, {
 		intensity: skyHazeIntensity
 		,scale: scale
 		,hazeColor: skyHazeColor
 		,hazeStart: -0.5
 	});
-	render8bit((layer+1)/(layers+1), false, "haze");
+	render(preCanvas, (layer+1)/(layers+1), false, "haze");
 	
 	addClouds(layer);
 
 	/*generateHouse(preCanvas, preContext, {scale: scale});
-	render8bit((layer+1)/(layers+1), false);*/
+	render(preCanvas, (layer+1)/(layers+1), false);*/
 
 	layer++;
 	var hillshadeIntensity = 5 * sunBrightness;
-	var heightmap = generateTerrain(preCanvas, preContext, {
+	var heightmap = generateTerrain(preCanvas, preContext, width, height, {
 		 haze: 0.7
 		,terrainPoints: [
 			 preCanvas.height - Math.sqrt((layers-layer+1)/(layers+1))*heightSpan*preCanvas.height
@@ -330,11 +342,11 @@ function buildLandscape(){
 		,hillshadeIntensity: hillshadeIntensity
 	});
 
-	//render8bit((layer+1)/(layers+1), false);
+	//render(preCanvas, (layer+1)/(layers+1), false);
 	//return;
 	
 
-	render8bit((layer+1)/(layers+1), false, "terrain", {heightmap: heightmap, hillshadeIntensity: hillshadeIntensity});
+	render(preCanvas, (layer+1)/(layers+1), false, "terrain", {heightmap: heightmap, hillshadeIntensity: hillshadeIntensity});
 
 	//return;
 	
@@ -344,7 +356,7 @@ function buildLandscape(){
 
 	layer++;
 	var hillshadeIntensity = 4 * sunBrightness;
-	var heightmap = generateTerrain(preCanvas, preContext, {
+	var heightmap = generateTerrain(preCanvas, preContext, width, height, {
 		 haze: 0.7
 		,terrainPoints: [
 			 preCanvas.height - Math.sqrt((layers-layer+1)/(layers+1))*heightSpan*preCanvas.height
@@ -360,7 +372,7 @@ function buildLandscape(){
 		,hillshadeIntensity: hillshadeIntensity
 	});
 	
-	render8bit((layer+1)/(layers+1), false, "terrain", {heightmap: heightmap, hillshadeIntensity: hillshadeIntensity});
+	render(preCanvas, (layer+1)/(layers+1), false, "terrain", {heightmap: heightmap, hillshadeIntensity: hillshadeIntensity});
 
 	addHaze(layer);
 
@@ -369,7 +381,7 @@ function buildLandscape(){
 
 	layer++;
 	var hillshadeIntensity = 3 * sunBrightness;
-	var heightmap = generateTerrain(preCanvas, preContext, {
+	var heightmap = generateTerrain(preCanvas, preContext, width, height, {
 		 haze: 0.7
 		,terrainPoints: [
 			 preCanvas.height - Math.sqrt((layers-layer+1)/(layers+1))*heightSpan*preCanvas.height
@@ -385,7 +397,7 @@ function buildLandscape(){
 		,hillshadeIntensity: hillshadeIntensity
 	});
 
-	render8bit((layer+1)/(layers+1), false, "terrain", {heightmap: heightmap, hillshadeIntensity: hillshadeIntensity});
+	render(preCanvas, (layer+1)/(layers+1), false, "terrain", {heightmap: heightmap, hillshadeIntensity: hillshadeIntensity});
 
 	addHaze(layer);
 
@@ -393,14 +405,14 @@ function buildLandscape(){
 
 
 	if(rain){
-		generateRain(preCanvas, preContext, {intensity: rainIntensity, scale: scale/2, farAway: true, windSpeed: windSpeed});
-		renderRain((layer+1)/(layers+1), 0.1);
+		generateRain(preCanvas, preContext, width, height, {intensity: rainIntensity, scale: scale/2, farAway: true, windSpeed: windSpeed});
+		render(preCanvas, (layer+1)/(layers+1), false, "rain", {rainSpeed: 0.1});
 	}
 
 
 	layer++;
 	var hillshadeIntensity = 1 * sunBrightness;
-	var heightmap = generateTerrain(preCanvas, preContext, {
+	var heightmap = generateTerrain(preCanvas, preContext, width, height, {
 		 haze: 0.5
 		,terrainPoints: [
 			 preCanvas.height - Math.sqrt((layers-layer+1)/(layers+1))*heightSpan*preCanvas.height
@@ -416,20 +428,20 @@ function buildLandscape(){
 		,hillshadeIntensity: hillshadeIntensity
 	});
 
-	render8bit((layer+1)/(layers+1), false, "terrain", {heightmap: heightmap, hillshadeIntensity: hillshadeIntensity});
+	render(preCanvas, (layer+1)/(layers+1), false, "terrain", {heightmap: heightmap, hillshadeIntensity: hillshadeIntensity});
 	
 	addHaze(layer);
 
 	addClouds(layer);
 
 	if(rain){
-		generateRain(preCanvas, preContext, {intensity: rainIntensity, scale: scale, farAway: true, windSpeed: windSpeed});
-		renderRain((layer+1)/(layers+1), 0.2);
+		generateRain(preCanvas, preContext, width, height, {intensity: rainIntensity, scale: scale, farAway: true, windSpeed: windSpeed});
+		render(preCanvas, (layer+1)/(layers+1), false, "rain", {rainSpeed: 0.2});
 	}
 
 	layer++;
 	var hillshadeIntensity = 1 * sunBrightness;
-	var heightmap = generateTerrain(preCanvas, preContext, {
+	var heightmap = generateTerrain(preCanvas, preContext, width, height, {
 		 haze: 0.25
 		,terrainPoints: [
 			 preCanvas.height - Math.sqrt((layers-layer+1)/(layers+1))*heightSpan*preCanvas.height
@@ -445,27 +457,27 @@ function buildLandscape(){
 		,hillshadeIntensity: hillshadeIntensity
 	});
 
-	render8bit((layer+1)/(layers+1), false, "terrain", {heightmap: heightmap, hillshadeIntensity: hillshadeIntensity});
+	render(preCanvas, (layer+1)/(layers+1), false, "terrain", {heightmap: heightmap, hillshadeIntensity: hillshadeIntensity});
 	
 	addHaze(layer);
 
 	addClouds(layer);
 
 	if(rain){
-		generateRain(preCanvas, preContext, {intensity: rainIntensity, scale: scale, windSpeed: windSpeed});
-		renderRain((layer+1)/(layers+1), 1.2);
+		generateRain(preCanvas, preContext, width, height, {intensity: rainIntensity, scale: scale, windSpeed: windSpeed});
+		render(preCanvas, (layer+1)/(layers+1), false, "rain", {rainSpeed: 1.2});
 
-		generateRain(preCanvas, preContext, {intensity: rainIntensity, scale: scale, windSpeed: windSpeed});
-		renderRain((layer+1)/(layers+1)+0.05, 1.6);
+		generateRain(preCanvas, preContext, width, height, {intensity: rainIntensity, scale: scale, windSpeed: windSpeed});
+		render(preCanvas, (layer+1)/(layers+1)+0.05, false, "rain", {rainSpeed: 1.6});
 
-		generateRain(preCanvas, preContext, {intensity: rainIntensity, scale: scale, windSpeed: windSpeed});
-		renderRain((layer+1)/(layers+1)+0.1, 1.9);
+		generateRain(preCanvas, preContext, width, height, {intensity: rainIntensity, scale: scale, windSpeed: windSpeed});
+		render(preCanvas, (layer+1)/(layers+1)+0.1, false, "rain", {rainSpeed: 1.9});
 	}
 
 	layer++;
 
 	var hillshadeIntensity = 1 * sunBrightness;
-	var heightmap = generateTerrain(preCanvas, preContext, {
+	var heightmap = generateTerrain(preCanvas, preContext, width, height, {
 		 haze: 0
 		,terrainPoints: [
 			 preCanvas.height - Math.sqrt((layers-layer+1)/(layers+1))*heightSpan*preCanvas.height
@@ -480,14 +492,14 @@ function buildLandscape(){
 		,hillshadeIntensity: hillshadeIntensity
 	});
 
-	render8bit((layer+1)/(layers+1), false, "terrain", {heightmap: heightmap, hillshadeIntensity: hillshadeIntensity});
+	render(preCanvas, (layer+1)/(layers+1), false, "terrain", {heightmap: heightmap, hillshadeIntensity: hillshadeIntensity});
 	
 	addHaze(layer);
 
 	if(rain){
 
-		generateRain(preCanvas, preContext, {intensity: rainIntensity, scale: scale, windSpeed: windSpeed});
-		renderRain((layer+1)/(layers+1), 1);
+		generateRain(preCanvas, preContext, width, height, {intensity: rainIntensity, scale: scale, windSpeed: windSpeed});
+		render(preCanvas, (layer+1)/(layers+1), false, "rain", {rainSpeed: 1});
 
 	}
 
@@ -496,13 +508,13 @@ function buildLandscape(){
 	var nextTree = 0;
 	for(var i = ~~(terrain.length/5); i < terrain.length/2; i++){
 		if(nextTree <= 0){
-			generateEvergreen(preCanvas, preContext, {
+			generateEvergreen(preCanvas, preContext, width, height, {
 				 cx: (i)/(terrain.length) * preCanvas.width
 				,cy: terrain[i] + Math.random()*2
 				,segments: ~~(Math.random()*3 + 2)
 				,scale: Math.random()*1.2*scale + 1.6*scale
 			});
-			render8bit((layer+1)/(layers+1), false, "default");
+			render(preCanvas, (layer+1)/(layers+1), false, "default");
 
 			nextTree = Math.random() * 100 * scale + 20 * scale;
 		}
@@ -512,147 +524,35 @@ function buildLandscape(){
 	function addClouds(layer){
 		var distance = (layer/layers)*(layer/layers);
 		var cloudsCount = ~~(Math.random()*cloudiness*(1-distance)*10);
-		generateClouds(preCanvas, preContext, cloudsCount, distance, heightSpan, scale);
+		generateClouds(preCanvas, preContext, width, height, cloudsCount, distance, heightSpan, scale);
 		
-		generateHaze(preCanvas, preContext, {intensity: 0.1 * ((layers+1) / (layer+1)) * hazeIntensity, scale: scale, hazeColor: hazeColor, hazeStart: -1});
-		var cloud = render8bit((layer+1)/(layers+1), false, "cloud");
+		generateHaze(preCanvas, preContext, width, height, {intensity: 0.1 * ((layers+1) / (layer+1)) * hazeIntensity, scale: scale, hazeColor: hazeColor, hazeStart: -1});
+		var cloud = render(preCanvas, (layer+1)/(layers+1), false, "cloud");
 		var left = 0;
 		
 	}
 
 	function addHaze(layer){
-		generateHaze(preCanvas, preContext, {
+		generateHaze(preCanvas, preContext, width, height, {
 			intensity: Math.sqrt((layers-layer+1)/(layers+1)) * hazeIntensity
 			,scale: scale
 			,hazeColor: hazeColor
 			,hazeStart: 1 - Math.sqrt((layers-layer+1)/(layers+1))*(heightSpan+ruggednessSpan)*2
 		});
-		render8bit((layer+1)/(layers+1), false, "haze");
+		render(preCanvas, (layer+1)/(layers+1), false, "haze");
 	}
 
 
-	function render8bit(layer, ignoreLightColor, type, settings){
-		
-		//var image = preContext.getImageData(0, 0, preCanvas.width, preCanvas.height);
-
-		/*
-		var colorResolution = 16;
-
-		var lightColorR = lightColor[0]/255;
-		var lightColorG = lightColor[1]/255;
-		var lightColorB = lightColor[2]/255;
-
-		for(var i = 0; i < image.data.length; i += 4){
-
-			if(image.data[i+3] > 220){
-
-				if(!ignoreLightColor){
-					image.data[i  ] *= lightColorR;
-					image.data[i+1] *= lightColorG;
-					image.data[i+2] *= lightColorB;
-				}
-
-				var variance = (Math.random()-0.5)*10;
-				
-				image.data[i  ] += variance;
-				image.data[i+1] += variance;
-				image.data[i+2] += variance;
-				
-				image.data[i  ] = colorResolution * Math.round(image.data[i  ]/colorResolution);
-				image.data[i+1] = colorResolution * Math.round(image.data[i+1]/colorResolution);
-				image.data[i+2] = colorResolution * Math.round(image.data[i+2]/colorResolution);
-
-				image.data[i+3] = 255;
-
-			} else {
-				image.data[i+3] = 0;
-			}
-		};
-		*/
-		
-
-		/*var canvas = document.createElement("canvas");
-		canvas.height = height*scale;
-		canvas.width = width*scale;
-		var context = canvas.getContext("2d");
-
-		preContext.putImageData(image, 0, 0);
-		context.drawImage(preCanvas, 0, 0);*/
+	function render(canvas, layer, ignoreLightColor, type, settings){
 
 		if(!settings){
 			settings = {};
 		}
 		settings.scale = scale;
-		renderer.addLayer(preCanvas, layer, type, settings);
+		renderer.addLayer(canvas, layer, type, settings);
 
 		preContext.clearRect(0, 0, preCanvas.width, preCanvas.height);
 
-		//return canvas;
-		
-	}
-
-	/*function renderTransparent8bit(layer){
-		var image = preContext.getImageData(0, 0, preCanvas.width, preCanvas.height);
-
-		var colorResolution = 16;
-
-		var lightColorR = lightColor[0]/255;
-		var lightColorG = lightColor[1]/255;
-		var lightColorB = lightColor[2]/255;
-
-		for(var i = 0; i < image.data.length; i += 4){
-
-				var variance = (Math.random()-0.5)*10;
-
-				image.data[i  ] *= lightColorR;
-				image.data[i+1] *= lightColorG;
-				image.data[i+2] *= lightColorB;
-				
-				image.data[i  ] += variance;
-				image.data[i+1] += variance;
-				image.data[i+2] += variance;
-				if(image.data[i+3] > 0){
-					image.data[i+3] += variance;
-				}
-				
-				image.data[i  ] = colorResolution * Math.round(image.data[i  ]/colorResolution);
-				image.data[i+1] = colorResolution * Math.round(image.data[i+1]/colorResolution);
-				image.data[i+2] = colorResolution * Math.round(image.data[i+2]/colorResolution);
-				image.data[i+3] = colorResolution * Math.round(image.data[i+3]/colorResolution);
-				
-		};
-
-		var canvas = document.createElement("canvas");
-		canvas.height = height*scale;
-		canvas.width = width*scale;
-		var context = canvas.getContext("2d");
-
-		preContext.putImageData(image, 0, 0);
-		context.drawImage(preCanvas, 0, 0);
-
-		renderer.addLayer(canvas, layer, "default");
-
-		preContext.clearRect(0, 0, preCanvas.width, preCanvas.height);
-
-		return canvas;
-	}*/
-
-	function renderRain(layer, speed){
-		//var image = preContext.getImageData(0, 0, preCanvas.width, preCanvas.height);
-
-		/*var canvas = document.createElement("canvas");
-		canvas.height = height*scale;
-		canvas.width = width*scale;
-		var context = canvas.getContext("2d");
-
-		preContext.putImageData(image, 0, 0);
-		context.drawImage(preCanvas, 0, 0);*/
-
-		renderer.addLayer(preCanvas, layer, "rain", {rainSpeed: speed});
-
-		preContext.clearRect(0, 0, preCanvas.width, preCanvas.height);
-
-		//return canvas;
 	}
 
 }

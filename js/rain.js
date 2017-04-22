@@ -1,13 +1,13 @@
 
 
-function generateRain(canvas, context, settings){
+function generateRain(canvas, context, imageWidth, imageHeight, settings){
 
 	var {intensity, scale, farAway} = settings;
 
 	if(!farAway){
 
 		context.fillStyle = "rgba(180, 180, 180, 0)";
-		context.fillRect(0, 0, canvas.width, canvas.height);
+		context.fillRect(0, 0, imageWidth, imageHeight);
 
 		var count = 1000 * intensity * scale * scale;
 
@@ -18,8 +18,8 @@ function generateRain(canvas, context, settings){
 
 		for(var i = 0; i < count; i++){
 
-			var posX = ~~(Math.random() * canvas.width)+0.5;
-			var posY = ~~(Math.random() * canvas.height)+0.5;
+			var posX = ~~(Math.random() * imageWidth)+0.5;
+			var posY = ~~(Math.random() * imageHeight)+0.5;
 			var yLength = Math.random()*15;
 			
 			context.moveTo(posX, posY);
@@ -32,8 +32,8 @@ function generateRain(canvas, context, settings){
 
 	} else {
 		var cirrusCanvas = document.createElement("canvas");
-		cirrusCanvas.width = canvas.width;
-		cirrusCanvas.height = canvas.height;
+		cirrusCanvas.width = imageWidth;
+		cirrusCanvas.height = imageHeight;
 		var cirrusContext = cirrusCanvas.getContext("2d");
 		
 		cirrusContext.fillStyle = "rgba(180, 180, 180, 1)";

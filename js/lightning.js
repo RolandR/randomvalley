@@ -1,6 +1,6 @@
 
 
-function generateLightning(canvas, context, settings){
+function generateLightning(canvas, context, imageWidth, imageHeight, settings){
 
 	var {scale, density} = settings;
 
@@ -12,7 +12,7 @@ function generateLightning(canvas, context, settings){
 	context.lineJoin = "bevel";
 	context.lineCap = "round";
 	
-	var xPos = ~~(Math.random() * canvas.width);
+	var xPos = ~~(Math.random() * imageWidth);
 	var yPos = 0;
 
 
@@ -26,7 +26,7 @@ function generateLightning(canvas, context, settings){
 
 		var i = 0;
 
-		while(yPos < canvas.height && i < ttl){
+		while(yPos < imageHeight && i < ttl){
 
 			if(Math.random() < branchProbability){
 				context.save();

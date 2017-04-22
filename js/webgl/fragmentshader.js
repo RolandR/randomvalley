@@ -5,6 +5,8 @@ precision mediump float;
 uniform sampler2D u_image;
 
 uniform vec2 onePixel;
+uniform vec2 textureSize;
+uniform vec2 viewportSize;
 uniform vec2 offset;
 uniform float parallax;
 
@@ -65,6 +67,8 @@ uniform sampler2D u_image0;
 uniform sampler2D u_image1;
 
 uniform vec2 onePixel;
+uniform vec2 textureSize;
+uniform vec2 viewportSize;
 uniform vec2 offset;
 uniform float parallax;
 uniform float scale;
@@ -76,16 +80,14 @@ uniform vec3 sunLight;
 varying vec2 texCoord;
 
 vec2 getCoords(vec2 coord, vec2 offset){
-	return mod(coord + onePixel * floor(offset), 1.0);
+	return mod(coord + onePixel * offset, 1.0);
 }
 
 void main(void){
 	
 	float grade =
-		texture2D(u_image1, mod(texCoord + onePixel * (floor(offset*parallax)), 1.0)).r
-	  - texture2D(u_image1, mod(texCoord + onePixel * (floor(offset*parallax) + sunPosition), 1.0)).r;
-	
-	//grade = grade * (hillshadeIntensity/(scale+1.0));
+		texture2D(u_image1, mod(texCoord + onePixel * (floor(offset*parallax+0.5)), 1.0)).r
+	  - texture2D(u_image1, mod(texCoord + onePixel * (floor(offset*parallax+0.5) + sunPosition), 1.0)).r;
 
 	grade = grade * 3.0;
 
@@ -133,6 +135,8 @@ precision mediump float;
 uniform sampler2D u_image;
 
 uniform vec2 onePixel;
+uniform vec2 textureSize;
+uniform vec2 viewportSize;
 uniform vec2 offset;
 uniform float parallax;
 
@@ -150,7 +154,19 @@ vec2 getCoords(vec2 coord, vec2 offset){
 
 void main(void){
 
-	vec2 coord = mat2(sunPosition.y, -sunPosition.x, sunPosition.x, sunPosition.y) * (texCoord - vec2(0.5, 0.2)) + vec2(0.5, 0.2);
+	vec2 coord = texCoord;
+	coord.x *= viewportSize.x / textureSize.x;
+	coord.y *= viewportSize.y / textureSize.y;
+
+	vec2 origin = vec2(
+		0.5*(viewportSize.x / textureSize.x),
+		0.2*(viewportSize.y / textureSize.y)
+	);
+	
+	coord = mat2(sunPosition.x, -sunPosition.y, sunPosition.y, sunPosition.x) * (coord - origin) + origin;
+
+	coord.x = (floor(coord.x * textureSize.x)+0.5)/textureSize.x;
+	coord.y = (floor(coord.y * textureSize.y)+0.5)/textureSize.y;
 
 	vec4 color = texture2D(u_image, getCoords(coord, offset*parallax));
 	
@@ -160,7 +176,7 @@ void main(void){
 	color.rgb += color.rgb * (noise-0.5)/32.0 + (noise-0.5)/32.0;
 	color = floor((color)*16.0)/16.0;
 
-	color.a = color.a - sunLight.r;
+	color.a = color.a - sunLight.b*2.0;
 	
 	gl_FragColor = color;
 	

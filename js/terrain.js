@@ -1,4 +1,4 @@
-function generateTerrain(canvas, context, settings){
+function generateTerrain(canvas, context, imageWidth, imageHeight, settings){
 
 	var {
 		haze,
@@ -17,7 +17,7 @@ function generateTerrain(canvas, context, settings){
 	smoothness = smoothness * scale;
 	snowness = snowness / scale;
 	
-	var terrainBorders = [0, canvas.width];
+	var terrainBorders = [0, imageWidth];
 	var terrainWidth = Math.abs(terrainBorders[0] - terrainBorders[1]);
 
 	generateStep();
@@ -76,12 +76,12 @@ function generateTerrain(canvas, context, settings){
 		for(var i in peaks){
 			context.beginPath();
 			context.moveTo(
-				(peaks[i]/(len)) * canvas.width,
+				(peaks[i]/(len)) * imageWidth,
 				0
 			);
 			context.lineTo(
-				(peaks[i]/(len)) * canvas.width,
-				canvas.height
+				(peaks[i]/(len)) * imageWidth,
+				imageHeight
 			);
 			context.stroke();
 		}
@@ -99,12 +99,12 @@ function generateTerrain(canvas, context, settings){
 		
 		context.lineTo(
 			terrainBorders[0],
-			canvas.height
+			imageHeight
 		);
 		
 		context.lineTo(
 			terrainWidth + terrainBorders[0],
-			canvas.height
+			imageHeight
 		);
 		
 		context.lineTo(
@@ -130,40 +130,40 @@ function generateTerrain(canvas, context, settings){
 	}
 
 	function generateHeightmap(){
-		var image = context.getImageData(0, 0, canvas.width, canvas.height);
+		var image = context.getImageData(0, 0, imageWidth, imageHeight);
 
-		var heightmap = new Float32Array(canvas.width * canvas.height);
+		var heightmap = new Float32Array(imageWidth * imageHeight);
 		heightmap.fill(0);
 
 		for(var i = 0; i < heightmap.length; i++){
-			var x = i % canvas.width;
-			var y = ~~(i / canvas.width);
+			var x = i % imageWidth;
+			var y = ~~(i / imageWidth);
 
 			if(image.data[i*4+3] > 0){
 				var above = 0;
 				
-				if(typeof image.data[i*4-canvas.width*4] == "undefined"){
+				if(typeof image.data[i*4-imageWidth*4] == "undefined"){
 					above = 0;
-				} else if(image.data[i*4-canvas.width*4] == 0){
+				} else if(image.data[i*4-imageWidth*4] == 0){
 					above = 0;
 				} else {
-					above = heightmap[i-canvas.width];
+					above = heightmap[i-imageWidth];
 
 					if(Math.random() < 0.6){
 						var directionNoise =
 							  noise.simplex2(x/(60*scale), y/(60*scale))
 							* noise.simplex2(x/(300*scale), y/(300*scale));
 							
-						directionNoise += (heightmap[i-canvas.width-1] - heightmap[i-canvas.width+1])*0.1;
+						directionNoise += (heightmap[i-imageWidth-1] - heightmap[i-imageWidth+1])*0.1;
 
 						directionNoise = Math.min(directionNoise, 0.5);
 						directionNoise = Math.max(directionNoise, -0.5);
 						
 						if(x != 0){
-							above = (above*(1-directionNoise) + heightmap[i-canvas.width-1]*(1+directionNoise)) / 2;
+							above = (above*(1-directionNoise) + heightmap[i-imageWidth-1]*(1+directionNoise)) / 2;
 						}
-						if(x != canvas.width){
-							above = (above*(1+directionNoise) + heightmap[i-canvas.width+1]*(1-directionNoise)) / 2;
+						if(x != imageWidth){
+							above = (above*(1+directionNoise) + heightmap[i-imageWidth+1]*(1-directionNoise)) / 2;
 						}
 					}
 				}
@@ -185,22 +185,22 @@ function generateTerrain(canvas, context, settings){
 
 		if(averagingWidth > 0){
 
-			var smoothHeightmap = new Float32Array(canvas.width * canvas.height);
+			var smoothHeightmap = new Float32Array(imageWidth * imageHeight);
 			var sum = 0;
 			
-			for(var y = 0; y < canvas.height; y++){
+			for(var y = 0; y < imageHeight; y++){
 
 				sum = 0;
-				var h = y * canvas.width;
+				var h = y * imageWidth;
 
 				for(var x = 0 - radius; x <= radius; x++){
-					sum += heightmap[h + (x + canvas.width) % canvas.width];
+					sum += heightmap[h + (x + imageWidth) % imageWidth];
 				}
 
-				for(var x = 0; x < canvas.width; x++){
+				for(var x = 0; x < imageWidth; x++){
 					
-					sum = sum - heightmap[h + (x - radius + canvas.width) % canvas.width]
-							  + heightmap[h + (x + radius + 1 + canvas.width) % canvas.width];
+					sum = sum - heightmap[h + (x - radius + imageWidth) % imageWidth]
+							  + heightmap[h + (x + radius + 1 + imageWidth) % imageWidth];
 					smoothHeightmap[h+x] = sum / averagingWidth;
 				}
 				
@@ -214,21 +214,21 @@ function generateTerrain(canvas, context, settings){
 
 	function paint(heightmap){
 
-		var hillshadeImage = context.getImageData(0, 0, canvas.width, canvas.height);
+		var hillshadeImage = context.getImageData(0, 0, imageWidth, imageHeight);
 
 		var radius = ~~(2/scale);
 		var averagingWidth = 2*radius+1;
 
-		for(var y = 0; y < canvas.height; y++){
+		for(var y = 0; y < imageHeight; y++){
 
 			var sum = 0;
-			var h = y * canvas.width;
+			var h = y * imageWidth;
 
 			for(var x = 0 - radius; x <= radius; x++){
-				sum += heightmap[h + (x + canvas.width) % canvas.width];
+				sum += heightmap[h + (x + imageWidth) % imageWidth];
 			}
 
-			for(var x = 0; x < canvas.width; x++){
+			for(var x = 0; x < imageWidth; x++){
 
 				var i = h+x;
 
@@ -236,8 +236,8 @@ function generateTerrain(canvas, context, settings){
 
 				if(averagingWidth > 0){
 					average = sum / averagingWidth;
-					sum = sum - heightmap[h + (x - radius + canvas.width) % canvas.width]
-							  + heightmap[h + (x + radius + 1 + canvas.width) % canvas.width];
+					sum = sum - heightmap[h + (x - radius + imageWidth) % imageWidth]
+							  + heightmap[h + (x + radius + 1 + imageWidth) % imageWidth];
 				} else {
 					average = heightmap[i];
 				}
@@ -263,7 +263,7 @@ function generateTerrain(canvas, context, settings){
 
 					/*var grade = 0;
 					if(x != 0){
-						grade = heightmap[i] - heightmap[h+(x-1+canvas.width)%canvas.width];
+						grade = heightmap[i] - heightmap[h+(x-1+imageWidth)%imageWidth];
 					}
 					
 					grade = grade * (hillshadeIntensity/(scale+1));
@@ -290,13 +290,24 @@ function generateTerrain(canvas, context, settings){
 			}
 		}
 
-		context.putImageData(hillshadeImage, 0, 0);
+		context.putImageData(hillshadeImage, 0, 0, 0, 0, imageWidth, imageHeight);
+
+		/*
+		var paddedHeightmap = new Float32Array(canvas.width * canvas.height * 3);
+		var x, y, n;
+		var paddedWidth = canvas.width;
+		for (var i = 0; i < heightmap.length; i++) {
+			x = i%imageWidth;
+			y = ~~(i/imageWidth);
+			n = y*paddedWidth+x;
+			paddedHeightmap[n] = heightmap[i];
+			//paddedHeightmap[i*3+1] = heightmap[i];
+			//paddedHeightmap[i*3+2] = heightmap[i];
+		}*/
 
 		var paddedHeightmap = new Float32Array(heightmap.length * 3);
 		for (var i = 0; i < heightmap.length; i++) {
-			paddedHeightmap[i*3  ] = heightmap[i];
-			//paddedHeightmap[i*3+1] = heightmap[i];
-			//paddedHeightmap[i*3+2] = heightmap[i];
+			paddedHeightmap[i*3] = heightmap[i];
 		}
 		return paddedHeightmap;
 	}

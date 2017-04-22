@@ -61,31 +61,38 @@ function Renderer(canvasId){
 	var hasErrors = false;
 	
 	if(gl.getShaderInfoLog(vertShader)){
-		console.warn(gl.getShaderInfoLog(vertShader));
+		console.log("Error in vertShader:");
+		console.error(gl.getShaderInfoLog(vertShader));
 		hasErrors = true;
 	}
 	if(gl.getShaderInfoLog(fragShader)){
-		console.warn(gl.getShaderInfoLog(fragShader));
+		console.log("Error in fragShader:");
+		console.error(gl.getShaderInfoLog(fragShader));
 		hasErrors = true;
 	}
 	if(gl.getProgramInfoLog(shaderProgram)){
-		console.warn(gl.getProgramInfoLog(shaderProgram));
+		console.log("Error in shaderProgram:");
+		console.error(gl.getProgramInfoLog(shaderProgram));
 		hasErrors = true;
 	}
 	if(gl.getShaderInfoLog(terrShader)){
-		console.warn(gl.getShaderInfoLog(terrShader));
+		console.log("Error in terrShader:");
+		console.error(gl.getShaderInfoLog(terrShader));
 		hasErrors = true;
 	}
 	if(gl.getProgramInfoLog(terrainProgram)){
-		console.warn(gl.getProgramInfoLog(terrainProgram));
+		console.log("Error in terrainProgram:");
+		console.error(gl.getProgramInfoLog(terrainProgram));
 		hasErrors = true;
 	}
 	if(gl.getShaderInfoLog(starShader)){
-		console.warn(gl.getShaderInfoLog(starShader));
+		console.log("Error in starShader:");
+		console.error(gl.getShaderInfoLog(starShader));
 		hasErrors = true;
 	}
 	if(gl.getProgramInfoLog(starProgram)){
-		console.warn(gl.getProgramInfoLog(starProgram));
+		console.log("Error in starProgram:");
+		console.error(gl.getProgramInfoLog(starProgram));
 		hasErrors = true;
 	}
 
@@ -127,10 +134,13 @@ function Renderer(canvasId){
 	
 
 	function addLayer(image, parallax, type, settings){
+		
 		var texture = gl.createTexture();
 		gl.bindTexture(gl.TEXTURE_2D, texture);
 		gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, image);
-		gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
+
+		gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST);
+		gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
 		gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
 		gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
 
@@ -158,6 +168,8 @@ function Renderer(canvasId){
 		
 		layers.push({
 			 texture: texture
+			,width: image.width
+			,height: image.height
 			,parallax: parallax*parallax*parallax*parallax
 			,type: type
 			,settings: settings
@@ -183,6 +195,11 @@ function Renderer(canvasId){
 		[21, 0.4 , 0.3 , 0.2 ],
 		[24, 0.07, 0.07, 0.07],
 	];
+
+	/*var sunLightColors = [
+		[0 , 0.07, 0.07, 0.07],
+		[24, 0.07, 0.07, 0.07],
+	];*/
 
 	var ambientLightColors = [
 		[0 , 0.1 , 0.2 , 0.25],
@@ -237,6 +254,9 @@ function Renderer(canvasId){
 		rainOffset[0] -= (diff/(2))*settings.windSpeed;
 		rainOffset[1] -= diff/(2);
 		cloudOffset -= (diff/100)*settings.windSpeed;
+		offsetX += diff/30;
+
+		
 		var activeProgram;
 
 		gl.viewport(0, 0, canvas.width, canvas.height);
@@ -280,14 +300,19 @@ function Renderer(canvasId){
 			}
 
 			var onePixelAttr = gl.getUniformLocation(activeProgram, "onePixel");
-			var offsetAttr = gl.getUniformLocation(activeProgram, "offset");
+			gl.uniform2f(onePixelAttr, 1/lastWidth, 1/lastHeight);
+
+			var textureSizeAttr = gl.getUniformLocation(activeProgram, "textureSize");
+			gl.uniform2f(textureSizeAttr, layers[i].width, layers[i].height);
+
+			var viewportSizeAttr = gl.getUniformLocation(activeProgram, "viewportSize");
+			gl.uniform2f(viewportSizeAttr, canvas.width, canvas.height);
+			
 			var parallaxAttr = gl.getUniformLocation(activeProgram, "parallax");
-			var preserveAlphaAttr = gl.getUniformLocation(activeProgram, "preserveAlpha");
+			gl.uniform1f(parallaxAttr, layers[i].parallax);
 
 			var sunPositionAttr = gl.getUniformLocation(activeProgram, "sunPosition");
 			gl.uniform2f(sunPositionAttr, sunPosition[0], sunPosition[1]);
-
-			var sunIntensity = 1 - (Math.max(sunPosition[1], 0.3)-0.3);
 
 			var ambientLightAttr = gl.getUniformLocation(activeProgram, "ambientLight");
 			gl.uniform3f(ambientLightAttr,
@@ -297,24 +322,13 @@ function Renderer(canvasId){
 			);
 
 			var sunLightAttr = gl.getUniformLocation(activeProgram, "sunLight");
-			/*gl.uniform3f(sunLightAttr,
-				(0.8+(Math.max(Math.abs(sunPosition[0]), 0.7)-0.7))*sunIntensity,
-				(0.8)*sunIntensity,
-				(0.3+(1-Math.abs(sunPosition[0]))*0.4))*sunIntensity;*/
-
 			gl.uniform3f(sunLightAttr,
 				sunLight[0],
 				sunLight[1],
 				sunLight[2]
 			);
 
-
-			gl.bindBuffer(gl.ARRAY_BUFFER, vertexBuffer);
-			
-			gl.enableVertexAttribArray(coord);
-			gl.vertexAttribPointer(coord, 2, gl.FLOAT, false, 0, 0);
-
-			gl.uniform2f(onePixelAttr, 1/lastWidth, 1/lastHeight);
+			var offsetAttr = gl.getUniformLocation(activeProgram, "offset");
 			if(layers[i].type == "rain"){
 				gl.uniform2f(
 					offsetAttr,
@@ -327,13 +341,18 @@ function Renderer(canvasId){
 				gl.uniform2f(offsetAttr, offsetX, 0);
 			}
 
+			var preserveAlphaAttr = gl.getUniformLocation(activeProgram, "preserveAlpha");
 			if(layers[i].type == "haze" || layers[i].type == "rain"){
 				gl.uniform1i(preserveAlphaAttr, true);
 			} else {
 				gl.uniform1i(preserveAlphaAttr, false);
 			}
+
+
+			gl.bindBuffer(gl.ARRAY_BUFFER, vertexBuffer);
 			
-			gl.uniform1f(parallaxAttr, layers[i].parallax);
+			gl.enableVertexAttribArray(coord);
+			gl.vertexAttribPointer(coord, 2, gl.FLOAT, false, 0, 0);
 
 			gl.disable(gl.DEPTH_TEST);
 			gl.enable(gl.BLEND);
@@ -342,8 +361,6 @@ function Renderer(canvasId){
 			gl.drawArrays(gl.TRIANGLES, 0, size);
 
 		}
-
-		offsetX += 1;
 
 		window.requestAnimationFrame(render);
 		

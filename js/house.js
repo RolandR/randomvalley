@@ -1,5 +1,5 @@
 
-function generateHouse(canvas, context, settings){
+function generateHouse(canvas, context, imageWidth, imageHeight, settings){
 
 	var {scale} = settings;
 	
@@ -17,7 +17,7 @@ function generateHouse(canvas, context, settings){
 	var roofHeight = 120*scale;
 
 	context.save();
-	context.translate(~~(canvas.width/2 - (compartmentWidth*windows)/2), ~~(canvas.height));
+	context.translate(~~(imageWidth/2 - (compartmentWidth*windows)/2), ~~(imageHeight));
 	
 	context.beginPath();
 	context.moveTo(0, 0);

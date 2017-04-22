@@ -1,25 +1,25 @@
 
 
-function generateClouds(canvas, context, count, distance, heightSpan, scale){
+function generateClouds(canvas, context, imageWidth, imageHeight, count, distance, heightSpan, scale){
 	var cloudCanvas = document.createElement("canvas");
-	cloudCanvas.height = canvas.height;
-	cloudCanvas.width = canvas.width*3;
+	cloudCanvas.height = imageHeight;
+	cloudCanvas.width = imageWidth*3;
 	var cloudContext = cloudCanvas.getContext("2d");
 	
 	for(var i = 0; i < count; i++){
 		cloudContext.clearRect(0, 0, cloudCanvas.width, cloudCanvas.height);
 		
 		generateCloud(cloudCanvas, cloudContext, {
-			 cx: Math.random() * canvas.width + canvas.width
-			,cy: (1-distance) * canvas.height * (1-heightSpan) + (Math.random()-0.5) * canvas.height/6
+			 cx: Math.random() * imageWidth + imageWidth
+			,cy: (1-distance) * imageHeight * (1-heightSpan) + (Math.random()-0.5) * imageHeight/6
 			,count: 3 + ~~(Math.random()*5)
 			,initialRadius: 30*scale + distance*20
 			,resolution: 100 * distance + 20
 		});
 		
-		context.drawImage(cloudCanvas, canvas.width,   0, canvas.width, canvas.height, 0, 0, canvas.width, canvas.height);
-		context.drawImage(cloudCanvas, 0,              0, canvas.width, canvas.height, 0, 0, canvas.width, canvas.height);
-		context.drawImage(cloudCanvas, canvas.width*2, 0, canvas.width, canvas.height, 0, 0, canvas.width, canvas.height);
+		context.drawImage(cloudCanvas, imageWidth,   0, imageWidth, imageHeight, 0, 0, imageWidth, imageHeight);
+		context.drawImage(cloudCanvas, 0,              0, imageWidth, imageHeight, 0, 0, imageWidth, imageHeight);
+		context.drawImage(cloudCanvas, imageWidth*2, 0, imageWidth, imageHeight, 0, 0, imageWidth, imageHeight);
 	
 	}
 	//context.drawImage(cloudCanvas, sx,          sy,       sWidth,       sHeight, dx, dy,     dWidth,       dHeight);
