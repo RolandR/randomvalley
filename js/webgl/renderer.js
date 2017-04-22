@@ -146,7 +146,7 @@ function Renderer(canvasId){
 				0,
 				gl.RGB,
 				gl.FLOAT,
-				Float32Array.from(settings.heightmap)
+				settings.heightmap
 			);
 			gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
 			gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
