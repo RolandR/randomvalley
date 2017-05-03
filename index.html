@@ -29,8 +29,10 @@
 				image-rendering: -moz-crisp-edges;
 				position: absolute;
 			}
-			#prerenderCanvas{
-				display: none;
+			.hidePrerenderCanvas{
+				overflow:hidden;
+				height:0px;
+				position:relative;
 			}
 		</style>
 	</head>
@@ -42,9 +44,11 @@
 		<div id="canvasDiv">
 
 		</div>
-		<canvas id="prerenderCanvas">
-			Needs more canvas
-		</canvas>
+		<div class="hidePrerenderCanvas">
+			<canvas id="prerenderCanvas">
+				Needs more canvas
+			</canvas>
+		</div>
 	</body>
 	<script type="text/javascript" src="./js/perlin.js"></script>
 
